@@ -11,6 +11,7 @@ const NUTRIENT_IDS = {
 };
 
 let debounceTimer = null;
+let debounceReject = null;
 
 /**
  * Get the stored API key from settings, or null if not set.
@@ -62,7 +63,13 @@ async function searchFoods(query, pageSize = 10) {
 function searchFoodsDebounced(query, pageSize = 10, delayMs = 350) {
   return new Promise((resolve, reject) => {
     clearTimeout(debounceTimer);
+    if (debounceReject) {
+      debounceReject(new DOMException('Debounced', 'AbortError'));
+      debounceReject = null;
+    }
+    debounceReject = reject;
     debounceTimer = setTimeout(() => {
+      debounceReject = null;
       searchFoods(query, pageSize).then(resolve).catch(reject);
     }, delayMs);
   });

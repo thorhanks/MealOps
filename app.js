@@ -96,7 +96,7 @@ function renderCookView(recipeId) {
 
 addRoute('/cook', () => {
   showView('cook');
-  renderCookGrid();
+  renderCookGrid().catch((err) => console.error('[Cook] render failed', err));
   setStatus('cook — recipes');
 });
 

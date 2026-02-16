@@ -40,11 +40,11 @@ function resolve() {
     }
   }
 
-  // No match
+  // No match — avoid redirect loop if already at fallback
   currentRoute = null;
   if (notFoundHandler) {
     notFoundHandler(hash);
-  } else {
+  } else if (hash !== '/cook') {
     navigate('/cook');
   }
 }

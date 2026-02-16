@@ -18,7 +18,10 @@ class RecipeForm extends HTMLElement {
       getRecipe(id).then((recipe) => {
         if (recipe) {
           this._recipe = recipe;
-          this._ingredients = recipe.ingredients.map((ing) => ({ ...ing }));
+          this._ingredients = recipe.ingredients.map((ing) => ({
+            ...ing,
+            nutrition: { ...(ing.nutrition || { protein: 0, carbs: 0, fat: 0, calories: 0 }) },
+          }));
         }
         this.render();
       });
@@ -134,19 +137,12 @@ class RecipeForm extends HTMLElement {
     });
 
     // Amount change → recalc nutrition if we have USDA data
+    // num-input proxies inner input events as 'change' on the host element
     const amountInput = row.querySelector('.ingredient-row__amount');
     amountInput.addEventListener('change', () => {
       this._ingredients[index].amount = parseFloat(amountInput.value) || 0;
       this._recalcIngredientNutrition(index);
     });
-    // Also listen on the inner input for direct typing
-    const amountField = amountInput.querySelector('input');
-    if (amountField) {
-      amountField.addEventListener('input', () => {
-        this._ingredients[index].amount = parseFloat(amountField.value) || 0;
-        this._recalcIngredientNutrition(index);
-      });
-    }
 
     // Unit change → recalc
     row.querySelector('.ingredient-row__unit').addEventListener('change', (e) => {
@@ -271,6 +267,7 @@ class RecipeForm extends HTMLElement {
 
       resultsEl.appendChild(list);
     } catch (err) {
+      if (err.name === 'AbortError') return; // debounced, ignore
       console.error('[API]', err);
       if (err.message === 'Invalid USDA API key') {
         resultsEl.innerHTML = '<span class="msg-error">invalid API key — check settings</span>';
@@ -308,37 +305,32 @@ class RecipeForm extends HTMLElement {
     resultsEl.innerHTML = `
       <div class="api-key-prompt">
         <span class="prompt">USDA API key required:</span>
-        <input type="text" class="input" id="api-key-input" placeholder="paste your API key">
-        <button class="btn" id="api-key-save">[save]</button>
-        <button class="btn" id="api-key-cancel">[cancel]</button>
+        <input type="text" class="input api-key-prompt__input" placeholder="paste your API key">
+        <button class="btn api-key-prompt__save">[save]</button>
+        <button class="btn api-key-prompt__cancel">[cancel]</button>
         <div><span class="api-key-prompt__hint">get a free key at fdc.nal.usda.gov/api-key-signup.html</span></div>
       </div>
     `;
 
-    const input = resultsEl.querySelector('#api-key-input');
+    const input = resultsEl.querySelector('.api-key-prompt__input');
     input.focus();
 
-    resultsEl.querySelector('#api-key-save').addEventListener('click', async () => {
+    const submitKey = async () => {
       const key = input.value.trim();
       if (key) {
         await saveApiKey(key);
         resultsEl.innerHTML = '<span class="msg-ok">API key saved</span>';
         setTimeout(() => this._handleSearch(index, row), 500);
       }
+    };
+
+    resultsEl.querySelector('.api-key-prompt__save').addEventListener('click', submitKey);
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitKey();
     });
 
-    input.addEventListener('keydown', async (e) => {
-      if (e.key === 'Enter') {
-        const key = input.value.trim();
-        if (key) {
-          await saveApiKey(key);
-          resultsEl.innerHTML = '<span class="msg-ok">API key saved</span>';
-          setTimeout(() => this._handleSearch(index, row), 500);
-        }
-      }
-    });
-
-    resultsEl.querySelector('#api-key-cancel').addEventListener('click', () => {
+    resultsEl.querySelector('.api-key-prompt__cancel').addEventListener('click', () => {
       resultsEl.innerHTML = '';
     });
   }
