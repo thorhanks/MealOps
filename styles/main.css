@@ -295,11 +295,17 @@ input[type="number"]::-webkit-outer-spin-button {
 .recipe-card__name {
   color: var(--text);
   font-size: var(--font-size-lg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .recipe-card__inventory {
   color: var(--text-muted);
   font-size: var(--font-size-sm);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .recipe-card__macros {

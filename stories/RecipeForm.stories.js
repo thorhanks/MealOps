@@ -87,8 +87,8 @@ export const ManualNutrition = {
     const nameInput = canvasElement.querySelector('.ingredient-row__name');
     await userEvent.type(nameInput, 'Rice');
 
-    // Set amount
-    const amountInput = canvasElement.querySelector('.ingredient-row__amount');
+    // Set amount (target the inner <input> inside <num-input>)
+    const amountInput = canvasElement.querySelector('.ingredient-row__amount input');
     await userEvent.clear(amountInput);
     await userEvent.type(amountInput, '200');
 
