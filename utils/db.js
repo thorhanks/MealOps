@@ -117,7 +117,9 @@ function remove(storeName, id) {
 // ── Recipes ──
 
 function getAllRecipes() {
-  return getByIndex('recipes', 'deleted', false);
+  return getAll('recipes').then((recipes) =>
+    recipes.filter((r) => !r.deleted)
+  );
 }
 
 function getRecipe(id) {
