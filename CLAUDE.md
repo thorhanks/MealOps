@@ -611,11 +611,17 @@ The entire application embraces a command-line, developer-tools aesthetic. Think
 - No UI component libraries — build everything from scratch
 
 #### Build System
-- **No build system** — the site runs as native JavaScript modules directly in the browser
-- No Webpack, Vite, Rollup, Parcel, or any bundler
+- **No build system for production** — the site runs as native JavaScript modules directly in the browser
+- No Webpack, Vite, Rollup, Parcel, or any bundler for the main application
 - No transpilation, no compilation step
 - Files are served as-is to the browser
 - Use `import`/`export` syntax with `.js` file extensions explicit in import paths
+
+**Exception: Storybook for Development**
+- Storybook is used exclusively for component development and testing
+- Storybook has its own build system, but this is isolated to the development environment
+- The production application remains completely independent of Storybook
+- Storybook files live in `/stories/` directory
 
 #### Dependencies
 - **NPM dependencies kept to absolute minimum**
@@ -623,6 +629,13 @@ The entire application embraces a command-line, developer-tools aesthetic. Think
 - If a dependency is needed, it must be justified and lightweight
 - Use CDN imports via ESM (e.g., `import x from 'https://esm.sh/package'`) if external code is needed
 - No package.json bloat
+
+**Development Dependencies:**
+- **Storybook**: Used for component development, documentation, and testing
+  - Storybook for web components
+  - Isolated development environment for each component
+  - Does not affect production code or build process
+  - Interaction tests for component behavior validation
 
 #### External APIs
 **USDA FoodData Central API**
@@ -786,6 +799,120 @@ OK: 3 servings logged
 - Console.log liberally during development
 - Use meaningful log prefixes: `[Router]`, `[DB]`, `[RecipeCard]`
 - IndexedDB can be inspected via DevTools → Application → IndexedDB
+
+### Storybook for Component Development
+
+**Setup:**
+- Use Storybook for web components
+- Storybook runs as a separate development environment
+- Does not affect the production application (which still runs as vanilla JS modules)
+- Install: `npx storybook@latest init`
+
+**Story Requirements:**
+
+1. **Main Site Story:**
+   - Create a story for `index.html` showing the full application
+   - Allows testing the complete integrated experience
+   - File: `stories/index.stories.js`
+
+2. **Component Stories:**
+   - Create a `.stories.js` file for each web component
+   - Each story should demonstrate the component in isolation
+   - Include multiple variants/states of the component
+   - Examples:
+     - `stories/RecipeCard.stories.js`
+     - `stories/InventoryCard.stories.js`
+     - `stories/CalorieGauge.stories.js`
+     - `stories/CommandPalette.stories.js`
+
+**Story Structure Example:**
+```javascript
+// stories/RecipeCard.stories.js
+export default {
+  title: 'Components/RecipeCard',
+  tags: ['autodocs'],
+};
+
+export const Default = {
+  render: () => {
+    const card = document.createElement('recipe-card');
+    card.setAttribute('recipe-name', 'Chicken Soup');
+    card.setAttribute('servings', '8');
+    return card;
+  },
+};
+
+export const LowInventory = {
+  render: () => {
+    const card = document.createElement('recipe-card');
+    card.setAttribute('recipe-name', 'Veggie Stir-Fry');
+    card.setAttribute('servings', '2');
+    return card;
+  },
+};
+```
+
+**Interaction Testing:**
+- Use Storybook's `@storybook/test` for interaction tests
+- Create interaction tests for each component
+- Test all user interactions:
+  - Button clicks
+  - Form submissions
+  - Input changes
+  - Keyboard navigation
+  - State changes
+  - Event dispatching
+
+**Interaction Test Example:**
+```javascript
+// stories/RecipeCard.stories.js
+import { expect } from '@storybook/test';
+import { userEvent, within } from '@storybook/test';
+
+export const ClickToView = {
+  render: () => {
+    const card = document.createElement('recipe-card');
+    card.setAttribute('recipe-name', 'Pasta Bake');
+    return card;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const viewButton = canvas.getByText('view');
+
+    await userEvent.click(viewButton);
+
+    // Assert that event was dispatched or state changed
+    await expect(card.classList.contains('expanded')).toBe(true);
+  },
+};
+```
+
+**Testing Guidelines:**
+- Test each component interaction in isolation
+- Verify state changes after user actions
+- Test keyboard accessibility (Tab, Enter, Escape, arrow keys)
+- Test edge cases (empty states, max values, invalid inputs)
+- Ensure terminal-style interactions work correctly
+- Test command palette commands and shortcuts
+
+**Running Storybook:**
+```bash
+# Start Storybook dev server
+npm run storybook
+
+# Run interaction tests
+npm run test-storybook
+
+# Build static Storybook for deployment (optional)
+npm run build-storybook
+```
+
+**Benefits:**
+- Develop components in isolation
+- Visual regression testing
+- Component documentation
+- Interaction testing without full app context
+- Easier debugging of component-specific issues
 
 ## Reference Aesthetic
 Think of these as visual references:
