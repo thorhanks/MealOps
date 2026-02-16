@@ -1,0 +1,23 @@
+{
+  "name": "mealops",
+  "version": "1.0.0",
+  "description": "Terminal-style web app for souper cube recipe management, inventory tracking, and macro tracking",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx http-server -p 8000 -c-1",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test-storybook": "test-storybook"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.0",
+    "@storybook/blocks": "^8.6.0",
+    "@storybook/test": "^8.6.0",
+    "@storybook/test-runner": "^0.21.0",
+    "@storybook/web-components": "^8.6.0",
+    "@storybook/web-components-vite": "^8.6.0",
+    "storybook": "^8.6.0"
+  },
+  "dependencies": {}
+}
