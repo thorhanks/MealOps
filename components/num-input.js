@@ -26,13 +26,22 @@ class NumInput extends HTMLElement {
     const btnMinus = this.querySelector('[data-dir="-"]');
     const btnPlus = this.querySelector('[data-dir="+"]');
 
+    // Determine the actual step increment (step="any" means use 1)
+    const stepVal = (step === 'any' || step === '') ? 1 : parseFloat(step) || 1;
+    const minVal = min !== '' ? parseFloat(min) : -Infinity;
+    const maxVal = max !== '' ? parseFloat(max) : Infinity;
+
     btnMinus.addEventListener('click', () => {
-      input.stepDown();
+      const current = parseFloat(input.value) || 0;
+      const next = Math.max(minVal, current - stepVal);
+      input.value = next;
       input.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
     btnPlus.addEventListener('click', () => {
-      input.stepUp();
+      const current = parseFloat(input.value) || 0;
+      const next = Math.min(maxVal, current + stepVal);
+      input.value = next;
       input.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
