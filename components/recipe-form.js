@@ -2,6 +2,7 @@ import { saveRecipe, getRecipe } from '../utils/db.js';
 import { searchFoodsDebounced, scaleNutrients, getApiKey, saveApiKey } from '../utils/api.js';
 import { UNIT_OPTIONS, toGrams, hasFixedConversion } from '../utils/units.js';
 import { navigate } from '../utils/router.js';
+import './num-input.js';
 
 class RecipeForm extends HTMLElement {
   constructor() {
@@ -50,9 +51,7 @@ class RecipeForm extends HTMLElement {
 
         <div class="recipe-form__field">
           <label>> servings:</label>
-          <input type="number" class="input" id="rf-servings" min="1"
-            value="${r?.servings || 1}"
-            placeholder="number of servings" style="width: 8ch;">
+          <num-input id="rf-servings" min="1" value="${r?.servings || 1}" width="6ch"></num-input>
         </div>
 
         <div class="recipe-form__section">
@@ -97,6 +96,8 @@ class RecipeForm extends HTMLElement {
       this.querySelector('#rf-ingredients').appendChild(row);
     });
 
+    this.querySelector('#rf-servings').addEventListener('change', () => this._updateMacrosSummary());
+
     this.querySelector('#rf-save').addEventListener('click', () => this._handleSave());
     this.querySelector('#rf-cancel').addEventListener('click', () => navigate('/cook'));
   }
@@ -114,8 +115,8 @@ class RecipeForm extends HTMLElement {
       <div class="ingredient-row__main">
         <input type="text" class="input ingredient-row__name" placeholder="ingredient name"
           value="${this._esc(ing.name || '')}">
-        <input type="number" class="input ingredient-row__amount" placeholder="amt" min="0" step="any"
-          value="${ing.amount || ''}" style="width: 8ch;">
+        <num-input class="ingredient-row__amount" min="0" step="any"
+          value="${ing.amount || ''}" width="6ch"></num-input>
         <select class="input ingredient-row__unit">${unitOptions}</select>
         <button class="btn ingredient-row__search" title="Search USDA">[search]</button>
         <button class="btn ingredient-row__manual" title="Manual entry">[manual]</button>
@@ -133,10 +134,19 @@ class RecipeForm extends HTMLElement {
     });
 
     // Amount change → recalc nutrition if we have USDA data
-    row.querySelector('.ingredient-row__amount').addEventListener('input', (e) => {
-      this._ingredients[index].amount = parseFloat(e.target.value) || 0;
+    const amountInput = row.querySelector('.ingredient-row__amount');
+    amountInput.addEventListener('change', () => {
+      this._ingredients[index].amount = parseFloat(amountInput.value) || 0;
       this._recalcIngredientNutrition(index);
     });
+    // Also listen on the inner input for direct typing
+    const amountField = amountInput.querySelector('input');
+    if (amountField) {
+      amountField.addEventListener('input', () => {
+        this._ingredients[index].amount = parseFloat(amountField.value) || 0;
+        this._recalcIngredientNutrition(index);
+      });
+    }
 
     // Unit change → recalc
     row.querySelector('.ingredient-row__unit').addEventListener('change', (e) => {

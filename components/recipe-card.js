@@ -1,5 +1,6 @@
 import { getInventory, addLogEntry, deleteRecipe } from '../utils/db.js';
 import { navigate } from '../utils/router.js';
+import './num-input.js';
 
 class RecipeCard extends HTMLElement {
   constructor() {
@@ -81,20 +82,20 @@ class RecipeCard extends HTMLElement {
     const actions = this.querySelector('.recipe-card__actions');
     actions.innerHTML = `
       <span class="prompt">servings made:</span>
-      <input type="number" class="input" min="1" value="1" style="width: 6ch;">
+      <num-input min="1" value="1" width="6ch"></num-input>
       <button class="btn" data-action="confirm-made">[ok]</button>
       <button class="btn" data-action="cancel">[cancel]</button>
     `;
 
-    const input = actions.querySelector('input');
-    input.focus();
-    input.select();
+    const numInput = actions.querySelector('num-input');
+    numInput.focus();
+    numInput.select();
 
     const confirm = actions.querySelector('[data-action="confirm-made"]');
     const cancel = actions.querySelector('[data-action="cancel"]');
 
     const submit = async () => {
-      const servings = parseInt(input.value, 10);
+      const servings = parseInt(numInput.value, 10);
       if (!servings || servings < 1) return;
 
       await addLogEntry({
@@ -110,7 +111,7 @@ class RecipeCard extends HTMLElement {
     };
 
     confirm.addEventListener('click', submit);
-    input.addEventListener('keydown', (e) => {
+    numInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') submit();
       if (e.key === 'Escape') this.render();
     });

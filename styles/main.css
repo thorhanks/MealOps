@@ -206,6 +206,53 @@ main {
   opacity: 0.6;
 }
 
+/* Number input spinner */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* <num-input> component */
+.num-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--border-muted);
+}
+
+.num-input:focus-within {
+  border-color: var(--border);
+}
+
+.num-input__field {
+  border: none !important;
+  border-bottom: none !important;
+  padding: var(--spacing-xs) var(--spacing-xs) !important;
+  text-align: center;
+}
+
+.num-input__btn {
+  color: var(--text-muted);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+  font-size: var(--font-size-base);
+  line-height: 1;
+  border: none;
+  background: none;
+}
+
+.num-input__btn:hover {
+  color: var(--text);
+  background: var(--border-muted);
+}
+
 /* ── Grid ── */
 .card-grid {
   display: grid;
@@ -272,7 +319,7 @@ main {
 
 /* ── Recipe Form ── */
 .recipe-form {
-  max-width: 80ch;
+  max-width: 120ch;
 }
 
 .recipe-form__field {
@@ -333,22 +380,23 @@ main {
 
 .ingredient-row__main {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .ingredient-row__name {
-  flex: 1;
-  min-width: 16ch;
+  flex: 1 1 12ch;
+  min-width: 12ch;
 }
 
 .ingredient-row__amount {
-  width: 8ch !important;
+  flex-shrink: 0;
 }
 
 .ingredient-row__unit {
   width: auto !important;
+  flex-shrink: 0;
   border: 1px solid var(--border-muted);
   padding: var(--spacing-xs);
   background: var(--bg);
