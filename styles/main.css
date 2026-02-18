@@ -640,12 +640,20 @@ input[type="number"]::-webkit-outer-spin-button {
   align-items: start;
 }
 
+.track-columns[hidden] {
+  display: none;
+}
+
 /* Date Navigation */
 .track-date-nav {
   display: flex;
   align-items: baseline;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
+}
+
+.track-date-nav[hidden] {
+  display: none;
 }
 
 .track-date-nav__label {
@@ -656,34 +664,15 @@ input[type="number"]::-webkit-outer-spin-button {
   flex: 1;
 }
 
-/* Ad-hoc Overlay */
-.track-adhoc-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 10vh;
-}
-
-.track-adhoc-overlay[hidden] {
+/* Ad-hoc Panel (content replacement) */
+.track-adhoc-panel[hidden] {
   display: none;
 }
 
-.track-adhoc-overlay__panel {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  padding: var(--spacing-md);
-  width: 110ch;
-  max-width: 90vw;
-}
-
-.track-adhoc-overlay__header {
+.track-adhoc-panel__header {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
 }
 

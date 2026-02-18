@@ -40,6 +40,7 @@ class AdhocFood extends HTMLElement {
         </div>
         <div class="adhoc-food__actions">
           <button class="btn btn-primary adhoc-food__submit">[log]</button>
+          <button class="btn adhoc-food__cancel">[cancel]</button>
         </div>
         <div class="adhoc-food__status"></div>
       </div>
@@ -51,6 +52,9 @@ class AdhocFood extends HTMLElement {
   _bindEvents() {
     this.querySelector('.adhoc-food__search').addEventListener('click', () => this._handleSearch());
     this.querySelector('.adhoc-food__submit').addEventListener('click', () => this._handleSubmit());
+    this.querySelector('.adhoc-food__cancel').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('adhoc-cancelled', { bubbles: true }));
+    });
 
     // Enter on name field triggers search
     this.querySelector('.adhoc-food__name').addEventListener('keydown', (e) => {
