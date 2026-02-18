@@ -198,6 +198,17 @@ function getInventory(recipeId) {
   });
 }
 
+async function getAllInventory() {
+  const recipes = await getAllRecipes();
+  const pairs = await Promise.all(
+    recipes.map(async (recipe) => ({
+      recipe,
+      inventory: await getInventory(recipe.id),
+    }))
+  );
+  return pairs.filter((p) => p.inventory > 0);
+}
+
 // ── Ingredient Cache ──
 
 function getCachedIngredient(name) {
@@ -243,6 +254,7 @@ export {
   getLogByDate,
   getConsumptionByDate,
   getInventory,
+  getAllInventory,
   getCachedIngredient,
   cacheIngredient,
   getSettings,

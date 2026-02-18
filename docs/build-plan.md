@@ -44,22 +44,24 @@ Recipe CRUD, USDA API integration, ingredient management.
 - Prompted at first use (inline prompt in ingredient row results area)
 - USDA always optional — manual macro entry always available
 
-### Phase 3: Eat Section (NOT STARTED)
+### Phase 3: Eat Section (COMPLETE)
 Inventory display, consumption logging, stacked card effect.
 
-**Planned deliverables:**
-- `components/eat-view.js` — Inventory grid showing recipes with stock > 0
-- `components/eat-card.js` — Card with stacked effect showing inventory depth
-- Consumption logging: select recipe → choose servings → log as consumption entry
-- Inventory validation: prevent consuming more than available
-- Stacked card CSS effect (see `docs/design-spec.md` for spec)
-- Route: `/eat` in app.js
+**Deliverables:**
+- `utils/db.js` — Added `getAllInventory()` helper (returns recipes with stock > 0)
+- `components/eat-card.js` — `<eat-card>` with stacked effect, inline consumption workflow
+- `components/eat-view.js` — `<eat-view>` inventory grid, empty state
+- `styles/main.css` — Stacked card CSS (few/some/many), eat layout styles
+- `app.js` — `/eat` route wired to `<eat-view>` component
+- `stories/EatCard.stories.js` — 7 stories (stock levels, interaction, grid)
+- `stories/EatView.stories.js` — 1 story (empty state)
 
 **Data flow:**
 - Read inventory from servingsLog (production - consumption per recipe)
 - Log consumption as `{ type: 'consumption', recipeId, servings, date }` in servingsLog
 - Show per-serving macros on each card
 - Update inventory count in real-time after logging
+- Inventory validation: prevents consuming more than available
 
 ### Phase 4: Track Section (NOT STARTED)
 Daily macro dashboard, bar gauge, weekly trend, ad-hoc food logging.
@@ -107,10 +109,14 @@ Command palette, import/export, keyboard shortcuts, remaining stories.
 /components/recipe-form.js     — <recipe-form>
 /components/recipe-view.js     — <recipe-view>
 /components/num-input.js       — <num-input>
+/components/eat-card.js        — <eat-card>
+/components/eat-view.js        — <eat-view>
 /stories/RecipeCard.stories.js — 8 stories
 /stories/RecipeForm.stories.js — 6 stories
 /stories/RecipeView.stories.js — 5 stories
 /stories/NumInput.stories.js   — 9 stories
+/stories/EatCard.stories.js    — 7 stories
+/stories/EatView.stories.js    — 1 story
 /.storybook/main.js            — Storybook config
 /.storybook/preview.js         — Storybook preview (loads CSS)
 /docs/features.md              — Feature specs

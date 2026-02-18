@@ -3,6 +3,7 @@ import { open, getAllRecipes } from './utils/db.js';
 import './components/recipe-card.js';
 import './components/recipe-form.js';
 import './components/recipe-view.js';
+import './components/eat-view.js';
 
 // ── View Management ──
 
@@ -92,6 +93,15 @@ function renderCookView(recipeId) {
   view.appendChild(recipeView);
 }
 
+// ── Eat: Inventory View ──
+
+function renderEatView() {
+  const view = views.eat;
+  view.innerHTML = '';
+  const eatView = document.createElement('eat-view');
+  view.appendChild(eatView);
+}
+
 // ── Routes ──
 
 addRoute('/cook', () => {
@@ -120,6 +130,7 @@ addRoute('/cook/:id/edit', (params) => {
 
 addRoute('/eat', () => {
   showView('eat');
+  renderEatView();
   setStatus('eat — inventory');
 });
 
