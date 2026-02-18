@@ -614,3 +614,261 @@ input[type="number"]::-webkit-outer-spin-button {
   flex-wrap: wrap;
   align-items: center;
 }
+
+/* ── Track Section ── */
+
+/* Track Header */
+.track-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.track-header__target {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-muted);
+}
+
+/* Date Navigation */
+.track-date-nav {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.track-date-nav__label {
+  min-width: 22ch;
+}
+
+/* Bar Gauge */
+.bar-gauge {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-base);
+}
+
+.bar-gauge__bar {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.bar-gauge__fill {
+  color: var(--text);
+}
+
+.bar-gauge__empty {
+  color: var(--text-muted);
+  opacity: 0.3;
+}
+
+.bar-gauge__text {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.bar-gauge--warning .bar-gauge__fill {
+  color: var(--accent);
+}
+
+.bar-gauge--warning .bar-gauge__text {
+  color: var(--accent);
+}
+
+.bar-gauge--over .bar-gauge__fill {
+  color: var(--error);
+}
+
+.bar-gauge--over .bar-gauge__text {
+  color: var(--error);
+}
+
+/* Macro Summary */
+.track-macros {
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Consumption Log */
+.consumption-log {
+  margin-bottom: var(--spacing-md);
+}
+
+.consumption-log__empty {
+  color: var(--text-muted);
+  padding: var(--spacing-sm) 0;
+}
+
+.consumption-log__entry {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--border-muted);
+}
+
+.consumption-log__time {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+  width: 5ch;
+}
+
+.consumption-log__name {
+  color: var(--text);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.consumption-log__detail {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.consumption-log__macros {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.consumption-log__delete {
+  flex-shrink: 0;
+}
+
+.consumption-log__confirm-prompt {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Ad-hoc Food Form */
+.adhoc-food {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-muted);
+}
+
+.adhoc-food__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-sm);
+}
+
+.adhoc-food__name {
+  flex: 1 1 16ch;
+  min-width: 16ch;
+}
+
+.adhoc-food__unit {
+  width: auto !important;
+  flex-shrink: 0;
+  border: 1px solid var(--border-muted);
+  padding: var(--spacing-xs);
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.adhoc-food__unit option {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.adhoc-food__results {
+  margin-bottom: var(--spacing-sm);
+}
+
+.adhoc-food__macros {
+  margin-bottom: var(--spacing-sm);
+}
+
+.adhoc-food__macro-fields {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: var(--font-size-sm);
+}
+
+.adhoc-food__macro-fields input {
+  width: 6ch !important;
+  text-align: right;
+}
+
+.adhoc-food__macro-fields label {
+  color: var(--text-muted);
+}
+
+.adhoc-food__actions {
+  margin-bottom: var(--spacing-sm);
+}
+
+.adhoc-food__status {
+  margin-top: var(--spacing-xs);
+}
+
+/* Weekly Trend */
+.weekly-trend {
+  margin-top: var(--spacing-md);
+}
+
+.weekly-trend__empty {
+  color: var(--text-muted);
+  padding: var(--spacing-sm) 0;
+}
+
+.weekly-trend__chart {
+  font-family: var(--font);
+  font-size: var(--font-size-sm);
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.weekly-trend__row {
+  white-space: nowrap;
+}
+
+.weekly-trend__row--over {
+  color: var(--error);
+}
+
+.weekly-trend__row--over .weekly-trend__fill {
+  color: var(--error);
+}
+
+.weekly-trend__row--selected {
+  background: rgba(255, 176, 0, 0.1);
+}
+
+.weekly-trend__day {
+  display: inline-block;
+  width: 4ch;
+}
+
+.weekly-trend__fill {
+  color: var(--text);
+}
+
+.weekly-trend__empty-bar {
+  color: var(--text-muted);
+  opacity: 0.3;
+}
+
+.weekly-trend__cal {
+  color: var(--text-muted);
+}
+
+.weekly-trend__pct {
+  color: var(--text-muted);
+}
