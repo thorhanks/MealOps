@@ -3,6 +3,7 @@ import './bar-gauge.js';
 import './weekly-trend.js';
 import './adhoc-food.js';
 import './num-input.js';
+import './macro-pie.js';
 
 // ── Date Helpers ──
 
@@ -93,7 +94,7 @@ class TrackView extends HTMLElement {
         <div class="track-columns">
           <div class="track-col-left">
             <div class="track-gauge"></div>
-            <div class="track-macro-summary"></div>
+            <div class="track-pie"></div>
             <div class="track-trend"></div>
           </div>
           <div class="track-col-right">
@@ -212,7 +213,7 @@ class TrackView extends HTMLElement {
     this._resolvedEntries = await this._resolveEntries(this._entries);
 
     this._renderGauge();
-    this._renderMacroSummary();
+    this._renderPie();
     this._renderLog();
     await this._renderTrend();
   }
@@ -291,16 +292,15 @@ class TrackView extends HTMLElement {
     container.appendChild(gauge);
   }
 
-  _renderMacroSummary() {
-    const container = this.querySelector('.track-macro-summary');
+  _renderPie() {
+    const container = this.querySelector('.track-pie');
     if (!container) return;
 
-    const t = this._sumMacros();
-    container.innerHTML = `
-      <div class="track-macros">
-        protein: ${Math.round(t.protein)}g | carbs: ${Math.round(t.carbs)}g | fat: ${Math.round(t.fat)}g
-      </div>
-    `;
+    const totals = this._sumMacros();
+    container.innerHTML = '';
+    const pie = document.createElement('macro-pie');
+    pie.data = { protein: totals.protein, carbs: totals.carbs, fat: totals.fat };
+    container.appendChild(pie);
   }
 
   _renderLog() {
