@@ -81,11 +81,17 @@ class TrackView extends HTMLElement {
           <button class="btn track-date-nav__today">[today]</button>
         </div>
 
-        <div class="track-gauge"></div>
-        <div class="track-macro-summary"></div>
-        <div class="track-log"></div>
-        <div class="track-adhoc"></div>
-        <div class="track-trend"></div>
+        <div class="track-columns">
+          <div class="track-col-left">
+            <div class="track-gauge"></div>
+            <div class="track-macro-summary"></div>
+            <div class="track-trend"></div>
+          </div>
+          <div class="track-col-right">
+            <div class="track-adhoc"></div>
+            <div class="track-log"></div>
+          </div>
+        </div>
       </div>
     `;
 
