@@ -23,7 +23,6 @@ class AdhocFood extends HTMLElement {
 
     this.innerHTML = `
       <div class="adhoc-food">
-        <h3 class="prompt">log ad-hoc food</h3>
         <div class="adhoc-food__row">
           <input type="text" class="input adhoc-food__name" placeholder="food name">
           <num-input class="adhoc-food__amount" min="0" step="any" value="" width="6ch" placeholder="amt"></num-input>

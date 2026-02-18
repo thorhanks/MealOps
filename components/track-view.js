@@ -79,13 +79,30 @@ class TrackView extends HTMLElement {
           <span class="track-date-nav__label prompt">showing: ${formatDate(this._selectedDate)}</span>
           <button class="btn track-date-nav__next">[&gt;]</button>
           <button class="btn track-date-nav__today">[today]</button>
+          <span class="track-date-nav__spacer"></span>
+          <button class="btn btn-primary track-date-nav__adhoc">[+ ad-hoc]</button>
         </div>
 
-        <div class="track-gauge"></div>
-        <div class="track-macro-summary"></div>
-        <div class="track-log"></div>
-        <div class="track-adhoc"></div>
-        <div class="track-trend"></div>
+        <div class="track-adhoc-overlay" hidden>
+          <div class="track-adhoc-overlay__panel">
+            <div class="track-adhoc-overlay__header">
+              <span class="prompt">ad-hoc food entry</span>
+              <button class="btn track-adhoc-overlay__close">[x]</button>
+            </div>
+            <div class="track-adhoc"></div>
+          </div>
+        </div>
+
+        <div class="track-columns">
+          <div class="track-col-left">
+            <div class="track-gauge"></div>
+            <div class="track-macro-summary"></div>
+            <div class="track-trend"></div>
+          </div>
+          <div class="track-col-right">
+            <div class="track-log"></div>
+          </div>
+        </div>
       </div>
     `;
 
@@ -111,13 +128,35 @@ class TrackView extends HTMLElement {
       this._loadDay().catch((err) => console.error('[Track] load failed', err));
     });
 
-    // Ad-hoc food form
+    // Ad-hoc food overlay
+    const overlay = this.querySelector('.track-adhoc-overlay');
     const adhoc = document.createElement('adhoc-food');
     adhoc.date = this._selectedDate;
     this.querySelector('.track-adhoc').appendChild(adhoc);
 
+    this.querySelector('.track-date-nav__adhoc').addEventListener('click', () => {
+      overlay.hidden = false;
+      const nameInput = overlay.querySelector('.adhoc-food__name');
+      if (nameInput) nameInput.focus();
+    });
+
+    this.querySelector('.track-adhoc-overlay__close').addEventListener('click', () => {
+      overlay.hidden = true;
+    });
+
+    // Close on backdrop click
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.hidden = true;
+    });
+
+    // Close on Escape
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') overlay.hidden = true;
+    });
+
     this.addEventListener('adhoc-logged', (e) => {
       this._handleAdhocLogged(e.detail);
+      overlay.hidden = true;
     });
   }
 
