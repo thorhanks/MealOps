@@ -3,6 +3,7 @@ import './bar-gauge.js';
 import './weekly-trend.js';
 import './adhoc-food.js';
 import './num-input.js';
+import './macro-pie.js';
 
 // ── Date Helpers ──
 
@@ -83,20 +84,17 @@ class TrackView extends HTMLElement {
           <button class="btn btn-primary track-date-nav__adhoc">[+ ad-hoc]</button>
         </div>
 
-        <div class="track-adhoc-overlay" hidden>
-          <div class="track-adhoc-overlay__panel">
-            <div class="track-adhoc-overlay__header">
-              <span class="prompt">ad-hoc food entry</span>
-              <button class="btn track-adhoc-overlay__close">[x]</button>
-            </div>
-            <div class="track-adhoc"></div>
+        <div class="track-adhoc-panel" hidden>
+          <div class="track-adhoc-panel__header">
+            <span class="prompt">ad-hoc food entry</span>
           </div>
+          <div class="track-adhoc"></div>
         </div>
 
         <div class="track-columns">
           <div class="track-col-left">
             <div class="track-gauge"></div>
-            <div class="track-macro-summary"></div>
+            <div class="track-pie"></div>
             <div class="track-trend"></div>
           </div>
           <div class="track-col-right">
@@ -128,35 +126,34 @@ class TrackView extends HTMLElement {
       this._loadDay().catch((err) => console.error('[Track] load failed', err));
     });
 
-    // Ad-hoc food overlay
-    const overlay = this.querySelector('.track-adhoc-overlay');
+    // Ad-hoc food panel (content replacement)
+    const adhocPanel = this.querySelector('.track-adhoc-panel');
+    const dateNav = this.querySelector('.track-date-nav');
+    const columns = this.querySelector('.track-columns');
     const adhoc = document.createElement('adhoc-food');
     adhoc.date = this._selectedDate;
     this.querySelector('.track-adhoc').appendChild(adhoc);
 
-    this.querySelector('.track-date-nav__adhoc').addEventListener('click', () => {
-      overlay.hidden = false;
-      const nameInput = overlay.querySelector('.adhoc-food__name');
+    const showAdhoc = () => {
+      dateNav.hidden = true;
+      columns.hidden = true;
+      adhocPanel.hidden = false;
+      const nameInput = adhocPanel.querySelector('.adhoc-food__name');
       if (nameInput) nameInput.focus();
-    });
+    };
 
-    this.querySelector('.track-adhoc-overlay__close').addEventListener('click', () => {
-      overlay.hidden = true;
-    });
+    const hideAdhoc = () => {
+      adhocPanel.hidden = true;
+      dateNav.hidden = false;
+      columns.hidden = false;
+    };
 
-    // Close on backdrop click
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.hidden = true;
-    });
+    this.querySelector('.track-date-nav__adhoc').addEventListener('click', showAdhoc);
 
-    // Close on Escape
-    overlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') overlay.hidden = true;
-    });
-
+    this.addEventListener('adhoc-cancelled', () => hideAdhoc());
     this.addEventListener('adhoc-logged', (e) => {
       this._handleAdhocLogged(e.detail);
-      overlay.hidden = true;
+      hideAdhoc();
     });
   }
 
@@ -216,7 +213,7 @@ class TrackView extends HTMLElement {
     this._resolvedEntries = await this._resolveEntries(this._entries);
 
     this._renderGauge();
-    this._renderMacroSummary();
+    this._renderPie();
     this._renderLog();
     await this._renderTrend();
   }
@@ -295,16 +292,15 @@ class TrackView extends HTMLElement {
     container.appendChild(gauge);
   }
 
-  _renderMacroSummary() {
-    const container = this.querySelector('.track-macro-summary');
+  _renderPie() {
+    const container = this.querySelector('.track-pie');
     if (!container) return;
 
-    const t = this._sumMacros();
-    container.innerHTML = `
-      <div class="track-macros">
-        protein: ${Math.round(t.protein)}g | carbs: ${Math.round(t.carbs)}g | fat: ${Math.round(t.fat)}g
-      </div>
-    `;
+    const totals = this._sumMacros();
+    container.innerHTML = '';
+    const pie = document.createElement('macro-pie');
+    pie.data = { protein: totals.protein, carbs: totals.carbs, fat: totals.fat };
+    container.appendChild(pie);
   }
 
   _renderLog() {

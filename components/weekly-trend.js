@@ -39,8 +39,8 @@ class WeeklyTrend extends HTMLElement {
       const filled = d.target > 0 ? Math.min(barWidth, Math.round((d.calories / d.target) * barWidth)) : 0;
       const empty = barWidth - filled;
 
-      const fillChars = '\u2588'.repeat(filled);
-      const emptyChars = '\u2591'.repeat(empty);
+      const fillChars = '#'.repeat(filled);
+      const emptyChars = '-'.repeat(empty);
 
       const isOver = pct > 100;
       const overClass = isOver ? ' weekly-trend__row--over' : '';
