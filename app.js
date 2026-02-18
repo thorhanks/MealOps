@@ -4,6 +4,7 @@ import './components/recipe-card.js';
 import './components/recipe-form.js';
 import './components/recipe-view.js';
 import './components/eat-view.js';
+import './components/track-view.js';
 
 // ── View Management ──
 
@@ -102,6 +103,15 @@ function renderEatView() {
   view.appendChild(eatView);
 }
 
+// ── Track: Dashboard ──
+
+function renderTrackView() {
+  const view = views.track;
+  view.innerHTML = '';
+  const trackView = document.createElement('track-view');
+  view.appendChild(trackView);
+}
+
 // ── Routes ──
 
 addRoute('/cook', () => {
@@ -136,6 +146,7 @@ addRoute('/eat', () => {
 
 addRoute('/track', () => {
   showView('track');
+  renderTrackView();
   setStatus('track — dashboard');
 });
 

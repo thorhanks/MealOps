@@ -63,23 +63,28 @@ Inventory display, consumption logging, stacked card effect.
 - Update inventory count in real-time after logging
 - Inventory validation: prevents consuming more than available
 
-### Phase 4: Track Section (NOT STARTED)
+### Phase 4: Track Section (COMPLETE)
 Daily macro dashboard, bar gauge, weekly trend, ad-hoc food logging.
 
-**Planned deliverables:**
-- `components/track-view.js` — Daily dashboard with date navigation
-- `components/bar-gauge.js` — Horizontal bar showing progress toward calorie/macro targets
-- `components/weekly-trend.js` — 7-day (Sun–Sat) ASCII bar chart
-- `components/adhoc-food.js` — Structured input for non-recipe foods (name, amount, unit, macros)
-- Daily log: list of consumption entries + ad-hoc entries for selected date
-- Target settings: configurable daily calorie/macro targets (stored in settings)
-- Routes: `/track` in app.js
+**Deliverables:**
+- `components/bar-gauge.js` — `<bar-gauge>` horizontal bar with color-coded calorie progress
+- `components/weekly-trend.js` — `<weekly-trend>` 7-day (Sun–Sat) ASCII bar chart
+- `components/adhoc-food.js` — `<adhoc-food>` structured input with USDA search + manual macros
+- `components/track-view.js` — `<track-view>` daily dashboard orchestrator (date nav, log, gauge, trend)
+- `styles/main.css` — Track section styles (gauge, trend, log, adhoc form)
+- `app.js` — `/track` route wired to `<track-view>` component
+- `stories/BarGauge.stories.js` — 7 stories (empty, low, half, near, at, over target, small target)
+- `stories/WeeklyTrend.stories.js` — 5 stories (typical, all over, empty, partial, no data)
+- `stories/AdhocFood.stories.js` — 2 stories (default, with event logging)
+- `stories/TrackView.stories.js` — 1 story (default full dashboard)
 
 **Data flow:**
 - Query servingsLog by date range for consumption entries
-- Join with recipe data to get macro values
-- Ad-hoc foods stored as servingsLog entries with `type: 'adhoc'` and inline macros
+- Recipe-based entries: look up recipe macros × servings (dynamic, supports retroactive recalc)
+- Ad-hoc foods stored as servingsLog entries with `type: 'consumption'`, `recipeId: null`, inline macros
 - Weekly trend aggregates daily totals for Sun–Sat of current week
+- Delete from log: removes entry, recipe-based deletions auto-restore inventory
+- Target calories persisted in settings store
 
 ### Phase 5: Polish (NOT STARTED)
 Command palette, import/export, keyboard shortcuts, remaining stories.
@@ -117,6 +122,14 @@ Command palette, import/export, keyboard shortcuts, remaining stories.
 /stories/NumInput.stories.js   — 9 stories
 /stories/EatCard.stories.js    — 7 stories
 /stories/EatView.stories.js    — 1 story
+/components/bar-gauge.js       — <bar-gauge>
+/components/weekly-trend.js    — <weekly-trend>
+/components/adhoc-food.js      — <adhoc-food>
+/components/track-view.js      — <track-view>
+/stories/BarGauge.stories.js   — 7 stories
+/stories/WeeklyTrend.stories.js — 5 stories
+/stories/AdhocFood.stories.js  — 2 stories
+/stories/TrackView.stories.js  — 1 story
 /.storybook/main.js            — Storybook config
 /.storybook/preview.js         — Storybook preview (loads CSS)
 /docs/features.md              — Feature specs
