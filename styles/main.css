@@ -652,6 +652,41 @@ input[type="number"]::-webkit-outer-spin-button {
   min-width: 22ch;
 }
 
+.track-date-nav__spacer {
+  flex: 1;
+}
+
+/* Ad-hoc Overlay */
+.track-adhoc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10vh;
+}
+
+.track-adhoc-overlay[hidden] {
+  display: none;
+}
+
+.track-adhoc-overlay__panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: var(--spacing-md);
+  width: 110ch;
+  max-width: 90vw;
+}
+
+.track-adhoc-overlay__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
 /* Bar Gauge */
 .bar-gauge {
   display: flex;
@@ -761,9 +796,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Ad-hoc Food Form */
 .adhoc-food {
-  margin-bottom: var(--spacing-md);
-  padding: var(--spacing-md);
-  border: 1px solid var(--border-muted);
+  padding: 0;
 }
 
 .adhoc-food__row {
