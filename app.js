@@ -7,10 +7,12 @@ import './components/eat-view.js';
 import './components/track-view.js';
 import './components/command-palette.js';
 import './components/help-view.js';
+import './components/welcome-view.js';
 
 // ── View Management ──
 
 const views = {
+  welcome: document.getElementById('view-welcome'),
   cook: document.getElementById('view-cook'),
   eat: document.getElementById('view-eat'),
   track: document.getElementById('view-track'),
@@ -116,6 +118,15 @@ function renderTrackView() {
 }
 
 // ── Routes ──
+
+addRoute('/', () => {
+  showView('welcome');
+  const view = views.welcome;
+  view.innerHTML = '';
+  const welcomeView = document.createElement('welcome-view');
+  view.appendChild(welcomeView);
+  setStatus('welcome');
+});
 
 addRoute('/cook', () => {
   showView('cook');

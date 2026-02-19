@@ -23,7 +23,7 @@ function navigate(path) {
 }
 
 function resolve() {
-  const hash = window.location.hash.slice(1) || '/cook';
+  const hash = window.location.hash.slice(1) || '/';
   console.log('[Router] resolving', hash);
 
   for (const [pattern, route] of routes) {
@@ -44,8 +44,8 @@ function resolve() {
   currentRoute = null;
   if (notFoundHandler) {
     notFoundHandler(hash);
-  } else if (hash !== '/cook') {
-    navigate('/cook');
+  } else if (hash !== '/') {
+    navigate('/');
   }
 }
 
