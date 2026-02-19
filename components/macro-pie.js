@@ -23,6 +23,7 @@ class MacroPie extends HTMLElement {
     if (total === 0) {
       this.innerHTML = `
         <div class="macro-pie">
+          <h3 class="prompt">daily macros</h3>
           <svg class="macro-pie__svg" viewBox="0 0 120 120" width="150" height="150">
             <circle cx="60" cy="60" r="50" fill="none"
               stroke="var(--border-muted)" stroke-width="10"
@@ -70,6 +71,7 @@ class MacroPie extends HTMLElement {
 
     this.innerHTML = `
       <div class="macro-pie">
+        <h3 class="prompt">daily macros</h3>
         <svg class="macro-pie__svg" viewBox="0 0 120 120" width="150" height="150"
           transform="rotate(-90)">
           ${circles}

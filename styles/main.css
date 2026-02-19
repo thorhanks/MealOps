@@ -655,6 +655,7 @@ input[type="number"]::-webkit-outer-spin-button {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--spacing-lg);
+  align-items: start;
 }
 
 .track-charts > * {
@@ -671,7 +672,7 @@ input[type="number"]::-webkit-outer-spin-button {
   display: flex;
   align-items: baseline;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
 }
 
 .track-date-nav[hidden] {
@@ -768,10 +769,13 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Macro Pie Chart */
 .macro-pie {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-lg);
-  margin-top: var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
+}
+
+.macro-pie > .prompt {
+  width: 100%;
 }
 
 .macro-pie__svg {
@@ -944,7 +948,7 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-top: var(--spacing-md);
   font-family: var(--font);
   font-size: var(--font-size-sm);
-  line-height: 1.3;
+  line-height: 1.1;
   color: var(--text);
 }
 

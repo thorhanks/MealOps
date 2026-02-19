@@ -61,7 +61,7 @@ class BodyGauge extends HTMLElement {
     // Build segments bottom-to-top
     const segments = [];
     for (let i = 0; i < SEGMENT_COUNT; i++) {
-      const y = PAD + INNER_H - (i + 1) * (SEGMENT_HEIGHT + SEGMENT_GAP) + SEGMENT_GAP;
+      const y = PAD + (SEGMENT_COUNT - 1 - i) * (SEGMENT_HEIGHT + SEGMENT_GAP);
       const isLit = i < litCount;
       const color = segmentColor(i, SEGMENT_COUNT);
 
@@ -85,7 +85,7 @@ class BodyGauge extends HTMLElement {
 
     for (const tp of tickPositions) {
       const segIndex = (tp.pct / 100) * SEGMENT_COUNT;
-      const y = PAD + INNER_H - segIndex * (SEGMENT_HEIGHT + SEGMENT_GAP);
+      const y = PAD + (SEGMENT_COUNT - segIndex) * (SEGMENT_HEIGHT + SEGMENT_GAP) - SEGMENT_GAP;
       const isMajor = tp.label !== '';
       const tickLen = isMajor ? 10 : 6;
 
@@ -103,11 +103,12 @@ class BodyGauge extends HTMLElement {
     }
 
     // Peak indicator — small marker at current level
-    const peakY = PAD + INNER_H - litCount * (SEGMENT_HEIGHT + SEGMENT_GAP);
+    const peakY = PAD + (SEGMENT_COUNT - litCount) * (SEGMENT_HEIGHT + SEGMENT_GAP) - SEGMENT_GAP;
     const peakColor = litCount >= SEGMENT_COUNT ? '#a04030' : '#aa7700';
 
     this.innerHTML = `
       <div class="body-gauge ${colorClass}">
+        <h3 class="prompt">daily calories</h3>
         <svg class="body-gauge__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
           <!-- Frame -->
           <rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" fill="none" stroke="#333" stroke-width="${FRAME_STROKE}" />
