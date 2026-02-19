@@ -644,11 +644,23 @@ input[type="number"]::-webkit-outer-spin-button {
   color: var(--text-muted);
 }
 
-/* Single-column Layout */
+/* Track Layout */
 .track-columns {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+}
+
+.track-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+.track-charts > * {
+  display: flex;
+  justify-content: center;
 }
 
 .track-columns[hidden] {
@@ -660,7 +672,7 @@ input[type="number"]::-webkit-outer-spin-button {
   display: flex;
   align-items: baseline;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
 }
 
 .track-date-nav[hidden] {
@@ -731,13 +743,39 @@ input[type="number"]::-webkit-outer-spin-button {
   color: var(--error);
 }
 
+/* Body Gauge — retro VU meter */
+.body-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.body-gauge__svg {
+  width: 134px;
+  height: 212px;
+}
+
+.body-gauge__text {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.body-gauge--over .body-gauge__text {
+  color: var(--error);
+}
+
 /* Macro Pie Chart */
 .macro-pie {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-lg);
-  margin-top: var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
+}
+
+.macro-pie > .prompt {
+  width: 100%;
 }
 
 .macro-pie__svg {
@@ -764,6 +802,17 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 /* Consumption Log */
+.consumption-log__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--spacing-sm);
+}
+
+.consumption-log__header h3 {
+  margin: 0;
+}
+
 .consumption-log {
   margin-bottom: var(--spacing-md);
 }
@@ -887,7 +936,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Weekly Trend */
 .weekly-trend {
-  margin-top: var(--spacing-xl);
+  margin-top: 0;
 }
 
 .weekly-trend__empty {
@@ -899,7 +948,7 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-top: var(--spacing-md);
   font-family: var(--font);
   font-size: var(--font-size-sm);
-  line-height: 1.8;
+  line-height: 1.1;
   color: var(--text);
 }
 

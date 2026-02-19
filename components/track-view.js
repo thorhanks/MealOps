@@ -1,5 +1,5 @@
 import { getConsumptionByDate, getRecipe, getSettings, saveSettings, addLogEntry, removeLogEntry } from '../utils/db.js';
-import './bar-gauge.js';
+import './body-gauge.js';
 import './weekly-trend.js';
 import './adhoc-food.js';
 import './num-input.js';
@@ -80,8 +80,6 @@ class TrackView extends HTMLElement {
           <span class="track-date-nav__label prompt">showing: ${formatDate(this._selectedDate)}</span>
           <button class="btn track-date-nav__next">[&gt;]</button>
           <button class="btn track-date-nav__today">[today]</button>
-          <span class="track-date-nav__spacer"></span>
-          <button class="btn btn-primary track-date-nav__adhoc">[+ ad-hoc]</button>
         </div>
 
         <div class="track-adhoc-panel" hidden>
@@ -92,9 +90,11 @@ class TrackView extends HTMLElement {
         </div>
 
         <div class="track-columns">
-          <div class="track-gauge"></div>
-          <div class="track-pie"></div>
-          <div class="track-trend"></div>
+          <div class="track-charts">
+            <div class="track-trend"></div>
+            <div class="track-gauge"></div>
+            <div class="track-pie"></div>
+          </div>
           <div class="track-log"></div>
         </div>
       </div>
@@ -144,7 +144,9 @@ class TrackView extends HTMLElement {
       columns.hidden = false;
     };
 
-    this.querySelector('.track-date-nav__adhoc').addEventListener('click', showAdhoc);
+    this.addEventListener('click', (e) => {
+      if (e.target.closest('.track-date-nav__adhoc')) showAdhoc();
+    });
 
     this.addEventListener('adhoc-cancelled', () => hideAdhoc());
     this.addEventListener('adhoc-logged', (e) => {
@@ -281,7 +283,7 @@ class TrackView extends HTMLElement {
 
     const totals = this._sumMacros();
     container.innerHTML = '';
-    const gauge = document.createElement('bar-gauge');
+    const gauge = document.createElement('body-gauge');
     gauge.setAttribute('current', totals.calories);
     gauge.setAttribute('target', this._targetCalories);
     gauge.setAttribute('label', 'kcal');
@@ -306,7 +308,10 @@ class TrackView extends HTMLElement {
     if (this._resolvedEntries.length === 0) {
       container.innerHTML = `
         <div class="consumption-log">
-          <h3 class="prompt">consumption log [${formatDate(this._selectedDate)}]</h3>
+          <div class="consumption-log__header">
+            <h3 class="prompt">consumption log [${formatDate(this._selectedDate)}]</h3>
+            <button class="btn btn-primary track-date-nav__adhoc">[+ food]</button>
+          </div>
           <div class="consumption-log__empty">no entries for this day</div>
         </div>
       `;
@@ -332,7 +337,10 @@ class TrackView extends HTMLElement {
 
     container.innerHTML = `
       <div class="consumption-log">
-        <h3 class="prompt">consumption log [${formatDate(this._selectedDate)}]</h3>
+        <div class="consumption-log__header">
+          <h3 class="prompt">consumption log [${formatDate(this._selectedDate)}]</h3>
+          <button class="btn btn-primary track-date-nav__adhoc">[+ food]</button>
+        </div>
         ${rows}
       </div>
     `;
