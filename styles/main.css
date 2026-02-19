@@ -742,7 +742,7 @@ input[type="number"]::-webkit-outer-spin-button {
   color: var(--error);
 }
 
-/* Body Gauge — Fallout-style silhouette fill */
+/* Body Gauge — retro VU meter */
 .body-gauge {
   display: flex;
   flex-direction: column;
@@ -751,21 +751,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .body-gauge__svg {
-  width: 120px;
-  height: 240px;
-}
-
-.body-gauge__outline {
-  fill: none;
-  stroke: var(--text-muted);
-  stroke-width: 1.5;
-  opacity: 0.3;
-}
-
-.body-gauge__fill {
-  fill: var(--text);
-  stroke: var(--text);
-  stroke-width: 1.5;
+  width: 134px;
+  height: 212px;
 }
 
 .body-gauge__text {
@@ -774,39 +761,8 @@ input[type="number"]::-webkit-outer-spin-button {
   white-space: nowrap;
 }
 
-.body-gauge--warning .body-gauge__fill {
-  fill: var(--accent);
-  stroke: var(--accent);
-}
-
-.body-gauge--warning .body-gauge__text {
-  color: var(--accent);
-}
-
-.body-gauge--over .body-gauge__fill {
-  fill: var(--error);
-  stroke: var(--error);
-  animation: body-gauge-pulse 1.5s ease-in-out infinite;
-}
-
-.body-gauge--over .body-gauge__outline {
-  stroke: var(--error);
-  opacity: 0.4;
-}
-
 .body-gauge--over .body-gauge__text {
   color: var(--error);
-}
-
-@keyframes body-gauge-pulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 1px var(--error));
-    opacity: 1;
-  }
-  50% {
-    filter: drop-shadow(0 0 4px var(--error));
-    opacity: 0.9;
-  }
 }
 
 /* Macro Pie Chart */
