@@ -8,6 +8,15 @@
   <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
+  <!-- CRT grain noise -->
+  <svg class="crt-grain" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <filter id="crt-noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#crt-noise)" />
+  </svg>
+
   <div id="app">
     <header>
       <span class="logo">MEALOPS <span class="version">v1.0.0</span></span>

@@ -32,6 +32,50 @@ body {
   line-height: 1.6;
   color: var(--text);
   background: var(--bg);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── CRT Screen Effect ── */
+
+/* Scanlines overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Vignette + grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Inline SVG noise filter for grain texture */
+.crt-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  opacity: 0.04;
+  mix-blend-mode: screen;
 }
 
 /* ── Typography ── */
@@ -52,6 +96,7 @@ h3 { font-size: var(--font-size-base); }
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-md);
+  text-shadow: 0 0 2px rgba(255, 176, 0, 0.15);
 }
 
 /* ── Header / Nav ── */
