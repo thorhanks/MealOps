@@ -1,5 +1,5 @@
 import { getConsumptionByDate, getRecipe, getSettings, saveSettings, addLogEntry, removeLogEntry } from '../utils/db.js';
-import './bar-gauge.js';
+import './body-gauge.js';
 import './weekly-trend.js';
 import './adhoc-food.js';
 import './num-input.js';
@@ -281,7 +281,7 @@ class TrackView extends HTMLElement {
 
     const totals = this._sumMacros();
     container.innerHTML = '';
-    const gauge = document.createElement('bar-gauge');
+    const gauge = document.createElement('body-gauge');
     gauge.setAttribute('current', totals.calories);
     gauge.setAttribute('target', this._targetCalories);
     gauge.setAttribute('label', 'kcal');
