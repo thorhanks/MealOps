@@ -54,20 +54,6 @@ body::before {
   z-index: 9999;
 }
 
-/* Vignette + grain overlay */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    transparent 50%,
-    rgba(0, 0, 0, 0.55) 100%
-  );
-  pointer-events: none;
-  z-index: 9998;
-}
-
 /* Inline SVG noise filter for grain texture */
 .crt-grain {
   position: fixed;
