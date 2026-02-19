@@ -1,23 +1,36 @@
-// Body Gauge — retro VU meter style vertical bar
+// Body Gauge — circular reactor core style calorie gauge
 
-const SEGMENT_COUNT = 20;
-const SEGMENT_GAP = 2;
-const SEGMENT_HEIGHT = 8;
+const SEGMENTS = 30;
+const ARC_START = 135;   // degrees — bottom-left
+const ARC_SWEEP = 270;   // 270° sweep to bottom-right
+const GAP_DEG = 2.5;
+const SEG_DEG = (ARC_SWEEP / SEGMENTS) - GAP_DEG;
 
-const TICK_W = 20;       // space for tick marks on the left
-const BAR_WIDTH = 80;
-const LABEL_W = 30;      // space for labels on the right
-const PAD = 6;            // top/bottom padding inside frame
-const FRAME_STROKE = 2;
+const CX = 100;
+const CY = 100;
+const R = 76;
+const STROKE_W = 10;
+const VIEW = 200;
 
-const BAR_X = TICK_W + FRAME_STROKE;
-const INNER_H = SEGMENT_COUNT * (SEGMENT_HEIGHT + SEGMENT_GAP) - SEGMENT_GAP;
-const VIEW_W = TICK_W + FRAME_STROKE + BAR_WIDTH + FRAME_STROKE + LABEL_W;
-const VIEW_H = PAD + INNER_H + PAD;
+function polar(angleDeg, r = R) {
+  const rad = (angleDeg * Math.PI) / 180;
+  return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
+}
 
-// Stepped color bands: dim amber -> amber -> bright amber
-function segmentColor(index, total) {
+function arcPath(startDeg, endDeg, r = R) {
+  const s = polar(startDeg, r);
+  const e = polar(endDeg, r);
+  const large = (endDeg - startDeg) > 180 ? 1 : 0;
+  return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
+}
+
+function segColor(index, total, over) {
   const ratio = index / (total - 1);
+  if (over) {
+    if (ratio < 0.5) return '#661a00';
+    if (ratio < 0.8) return '#993300';
+    return '#cc3300';
+  }
   if (ratio < 0.5) return '#664400';
   if (ratio < 0.8) return '#aa7700';
   return '#ffb000';
@@ -28,17 +41,8 @@ class BodyGauge extends HTMLElement {
     return ['current', 'target', 'label'];
   }
 
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.render();
-  }
-
-  attributeChangedCallback() {
-    if (this.isConnected) this.render();
-  }
+  connectedCallback() { this.render(); }
+  attributeChangedCallback() { if (this.isConnected) this.render(); }
 
   render() {
     const current = parseFloat(this.getAttribute('current')) || 0;
@@ -47,79 +51,85 @@ class BodyGauge extends HTMLElement {
 
     const pct = Math.round((current / target) * 100);
     const fillRatio = Math.min(1, current / target);
-    const litCount = Math.round(fillRatio * SEGMENT_COUNT);
-
+    const litCount = Math.round(fillRatio * SEGMENTS);
     const isOver = pct >= 100;
-    const colorClass = isOver ? 'body-gauge--over' : '';
 
-    // Frame
-    const frameX = TICK_W;
-    const frameY = 0;
-    const frameW = BAR_WIDTH + FRAME_STROKE * 2;
-    const frameH = VIEW_H;
+    // Background track — full arc, very dim
+    const trackPath = arcPath(ARC_START, ARC_START + ARC_SWEEP);
+    const track = `<path d="${trackPath}" fill="none" stroke="#1a1a1a" stroke-width="${STROKE_W + 2}" stroke-linecap="butt" />`;
 
-    // Build segments bottom-to-top
-    const segments = [];
-    for (let i = 0; i < SEGMENT_COUNT; i++) {
-      const y = PAD + (SEGMENT_COUNT - 1 - i) * (SEGMENT_HEIGHT + SEGMENT_GAP);
-      const isLit = i < litCount;
-      const color = segmentColor(i, SEGMENT_COUNT);
+    // Inner reference ring — dashed
+    const innerR = R - STROKE_W / 2 - 6;
+    const innerRing = `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, innerR)}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="3 3" />`;
 
-      segments.push(
-        `<rect x="${BAR_X}" y="${y}" width="${BAR_WIDTH}" height="${SEGMENT_HEIGHT}" fill="${color}" opacity="${isLit ? '1' : '0.1'}" />`
+    // Segments
+    const segs = [];
+    for (let i = 0; i < SEGMENTS; i++) {
+      const a0 = ARC_START + i * (SEG_DEG + GAP_DEG);
+      const a1 = a0 + SEG_DEG;
+      const lit = i < litCount;
+      const color = segColor(i, SEGMENTS, isOver && lit);
+
+      segs.push(
+        `<path d="${arcPath(a0, a1)}" fill="none" stroke="${color}" stroke-width="${STROKE_W}" stroke-linecap="butt" opacity="${lit ? 1 : 0.12}" style="transition:opacity .3s" />`
       );
     }
 
-    // Tick marks and labels on the left + right
+    // Tick marks at 0%, 25%, 50%, 75%, 100%
     const ticks = [];
-    const tickPositions = [
-      { pct: 0,   label: '0' },
-      { pct: 25,  label: '' },
-      { pct: 50,  label: '50' },
-      { pct: 75,  label: '' },
-      { pct: 100, label: '100' },
+    const tickDefs = [
+      { pct: 0,   lbl: '0' },
+      { pct: 25,  lbl: '' },
+      { pct: 50,  lbl: '50' },
+      { pct: 75,  lbl: '' },
+      { pct: 100, lbl: '100' },
     ];
 
-    const textColor = '#aa7700';
-    const tickColor = '#555';
+    for (const t of tickDefs) {
+      const angle = ARC_START + (t.pct / 100) * ARC_SWEEP;
+      const isMajor = t.lbl !== '';
+      const rInner = R + STROKE_W / 2 + 1;
+      const rOuter = R + STROKE_W / 2 + (isMajor ? 8 : 5);
+      const p1 = polar(angle, rInner);
+      const p2 = polar(angle, rOuter);
 
-    for (const tp of tickPositions) {
-      const segIndex = (tp.pct / 100) * SEGMENT_COUNT;
-      const y = PAD + (SEGMENT_COUNT - segIndex) * (SEGMENT_HEIGHT + SEGMENT_GAP) - SEGMENT_GAP;
-      const isMajor = tp.label !== '';
-      const tickLen = isMajor ? 10 : 6;
-
-      // Left tick mark
       ticks.push(
-        `<line x1="${TICK_W - tickLen}" y1="${y}" x2="${TICK_W}" y2="${y}" stroke="${tickColor}" stroke-width="1" />`
+        `<line x1="${p1.x.toFixed(2)}" y1="${p1.y.toFixed(2)}" x2="${p2.x.toFixed(2)}" y2="${p2.y.toFixed(2)}" stroke="#555" stroke-width="1" />`
       );
 
-      // Label on right
       if (isMajor) {
+        const lp = polar(angle, rOuter + 8);
         ticks.push(
-          `<text x="${BAR_X + BAR_WIDTH + FRAME_STROKE + 4}" y="${y + 3}" fill="${textColor}" font-family="monospace" font-size="9">${tp.label}</text>`
+          `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="#665500" font-family="var(--font)" font-size="8" text-anchor="middle" dominant-baseline="central">${t.lbl}</text>`
         );
       }
     }
 
-    // Peak indicator — small marker at current level
-    const peakY = PAD + (SEGMENT_COUNT - litCount) * (SEGMENT_HEIGHT + SEGMENT_GAP) - SEGMENT_GAP;
-    const peakColor = litCount >= SEGMENT_COUNT ? '#a04030' : '#aa7700';
+    // Redline marker at 100%
+    const redAngle = ARC_START + ARC_SWEEP;
+    const rl1 = polar(redAngle, R - STROKE_W / 2 - 3);
+    const rl2 = polar(redAngle, R + STROKE_W / 2 + 3);
+    const redline = `<line x1="${rl1.x.toFixed(2)}" y1="${rl1.y.toFixed(2)}" x2="${rl2.x.toFixed(2)}" y2="${rl2.y.toFixed(2)}" stroke="${isOver ? '#cc3300' : '#aa7700'}" stroke-width="2" />`;
+
+    // Center readout
+    const numColor = isOver ? '#cc3300' : '#ffb000';
+    const centerText = `
+      <text x="${CX}" y="${CY - 10}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="24" font-weight="bold">${Math.round(current)}</text>
+      <text x="${CX}" y="${CY + 8}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="10">/ ${Math.round(target)} ${label}</text>
+      <text x="${CX}" y="${CY + 24}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="13">${pct}%</text>
+    `;
 
     this.innerHTML = `
-      <div class="body-gauge ${colorClass}">
+      <div class="body-gauge ${isOver ? 'body-gauge--over' : ''}">
         <h3 class="prompt">daily calories</h3>
-        <svg class="body-gauge__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-          <!-- Frame -->
-          <rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" fill="none" stroke="#333" stroke-width="${FRAME_STROKE}" />
-          <!-- Segments -->
-          ${segments.join('\n          ')}
-          <!-- Peak indicator -->
-          <rect x="${BAR_X}" y="${peakY - 1}" width="${BAR_WIDTH}" height="2" fill="${peakColor}" opacity="0.8" />
-          <!-- Ticks and labels -->
+        <svg class="body-gauge__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
+          ${track}
+          ${innerRing}
+          ${segs.join('\n          ')}
           ${ticks.join('\n          ')}
+          ${redline}
+          ${centerText}
         </svg>
-        <div class="body-gauge__text">${Math.round(current)} / ${Math.round(target)} ${label} (${pct}%)</div>
       </div>
     `;
   }

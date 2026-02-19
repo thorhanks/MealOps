@@ -2,8 +2,8 @@
 
 /* ── Custom Properties ── */
 :root {
-  --bg: #0a0a0a;
-  --bg-surface: #111111;
+  --bg: #141008;
+  --bg-surface: #1a1510;
   --text: #ffb000;
   --text-muted: #aa7700;
   --error: #ff3333;
@@ -32,6 +32,36 @@ body {
   line-height: 1.6;
   color: var(--text);
   background: var(--bg);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── CRT Screen Effect ── */
+
+/* Scanlines overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Inline SVG noise filter for grain texture */
+.crt-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  opacity: 0.04;
+  mix-blend-mode: screen;
 }
 
 /* ── Typography ── */
@@ -52,6 +82,7 @@ h3 { font-size: var(--font-size-base); }
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-md);
+  text-shadow: 0 0 2px rgba(255, 176, 0, 0.15);
 }
 
 /* ── Header / Nav ── */
@@ -68,6 +99,7 @@ header {
   font-size: var(--font-size-lg);
   color: var(--text);
   letter-spacing: 0.1ch;
+  text-decoration: none;
 }
 
 .logo .version {
@@ -752,18 +784,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .body-gauge__svg {
-  width: 134px;
-  height: 212px;
-}
-
-.body-gauge__text {
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
-}
-
-.body-gauge--over .body-gauge__text {
-  color: var(--error);
+  width: 200px;
+  height: 200px;
 }
 
 /* Macro Pie Chart */
@@ -1073,6 +1095,64 @@ input[type="number"]::-webkit-outer-spin-button {
   border-top: 1px solid var(--border-muted);
   font-size: var(--font-size-sm);
   color: var(--text-muted);
+}
+
+/* ── Welcome View ── */
+.welcome-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--spacing-lg);
+  text-align: center;
+}
+
+.welcome-view__logo {
+  max-width: 320px;
+  width: 100%;
+  image-rendering: pixelated;
+}
+
+.welcome-view__tagline {
+  color: var(--text-muted);
+  font-size: var(--font-size-lg);
+}
+
+.welcome-view__desc {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 2;
+}
+
+.welcome-view__nav {
+  text-align: left;
+  line-height: 2.2;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.welcome-view__prompt {
+  color: var(--text);
+  display: block;
+  margin-bottom: var(--spacing-xs);
+}
+
+.welcome-view__nav-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 var(--spacing-md);
+  align-items: center;
+}
+
+.welcome-view__link {
+  text-align: center;
+}
+
+.welcome-view__hint {
+  color: var(--border-muted);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-md);
 }
 
 /* ── Help View ── */
