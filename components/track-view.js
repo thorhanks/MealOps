@@ -92,9 +92,11 @@ class TrackView extends HTMLElement {
         </div>
 
         <div class="track-columns">
-          <div class="track-gauge"></div>
-          <div class="track-pie"></div>
-          <div class="track-trend"></div>
+          <div class="track-charts">
+            <div class="track-gauge"></div>
+            <div class="track-pie"></div>
+            <div class="track-trend"></div>
+          </div>
           <div class="track-log"></div>
         </div>
       </div>

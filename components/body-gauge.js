@@ -32,42 +32,28 @@ class BodyGauge extends HTMLElement {
     if (pct >= 100) colorClass = 'body-gauge--over';
     else if (pct >= 90) colorClass = 'body-gauge--warning';
 
-    // Person silhouette path — simplified standing figure
-    // Head, neck, shoulders, torso, arms, hips, legs, feet
+    // Person silhouette — military/tactical standing figure
+    // Straight posture, arms at sides, straight legs, boots
     const personPath = `
-      M 50 8
-      C 38 8, 30 18, 30 28
-      C 30 38, 38 46, 50 46
-      C 62 46, 70 38, 70 28
-      C 70 18, 62 8, 50 8
-      Z
-      M 50 48
-      L 50 52
-      M 38 52
-      L 62 52
-      C 68 52, 74 56, 76 62
-      L 84 90
-      C 86 96, 82 98, 78 96
-      L 64 72
-      L 64 120
-      L 72 170
-      C 73 176, 70 180, 66 180
-      L 56 180
-      C 54 180, 54 176, 55 170
-      L 58 130
-      L 50 130
-      L 42 130
-      L 45 170
-      C 46 176, 46 180, 44 180
-      L 34 180
-      C 30 180, 27 176, 28 170
-      L 36 120
-      L 36 72
-      L 22 96
-      C 18 98, 14 96, 16 90
-      L 24 62
-      C 26 56, 32 52, 38 52
-      Z
+      M 43 10 L 43 6 C 43 2, 57 2, 57 6 L 57 10
+      C 57 14, 60 18, 60 20 L 60 24 C 60 28, 57 30, 57 30
+      L 43 30 C 43 30, 40 28, 40 24 L 40 20 C 40 18, 43 14, 43 10 Z
+      M 43 32 L 57 32
+      L 62 34 L 68 34 L 72 36
+      L 76 48 L 78 62 L 78 78
+      L 74 78 L 72 62 L 68 46 L 64 40
+      L 62 40 L 62 110
+      L 64 112 L 64 170 L 64 176
+      L 68 178 L 68 182 L 54 182 L 54 178 L 56 176
+      L 56 170 L 56 112 L 54 110
+      L 46 110 L 44 112
+      L 44 170 L 44 176 L 46 178 L 46 182
+      L 32 182 L 32 178 L 36 176 L 36 170
+      L 36 112 L 38 110
+      L 38 40 L 36 40
+      L 32 46 L 28 62 L 26 78
+      L 22 78 L 22 62 L 24 48 L 28 36
+      L 32 34 L 38 34 L 43 32 Z
     `;
 
     this.innerHTML = `
