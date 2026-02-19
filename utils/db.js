@@ -239,6 +239,38 @@ function saveSettings(settings) {
   return put('settings', settings);
 }
 
+// ── Bulk Operations (import/export) ──
+
+function getAllRecipesRaw() {
+  return getAll('recipes');
+}
+
+function getAllLogEntries() {
+  return getAll('servingsLog');
+}
+
+function getAllCachedIngredients() {
+  return getAll('ingredientCache');
+}
+
+function bulkPut(storeName, records) {
+  return open().then((db) => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      let count = 0;
+
+      transaction.oncomplete = () => resolve(count);
+      transaction.onerror = () => reject(transaction.error);
+
+      for (const record of records) {
+        store.put(record);
+        count++;
+      }
+    });
+  });
+}
+
 // ── Public API ──
 
 export {
@@ -259,4 +291,8 @@ export {
   cacheIngredient,
   getSettings,
   saveSettings,
+  getAllRecipesRaw,
+  getAllLogEntries,
+  getAllCachedIngredients,
+  bulkPut,
 };

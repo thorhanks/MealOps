@@ -86,16 +86,28 @@ Daily macro dashboard, bar gauge, weekly trend, ad-hoc food logging.
 - Delete from log: removes entry, recipe-based deletions auto-restore inventory
 - Target calories persisted in settings store
 
-### Phase 5: Polish (NOT STARTED)
-Command palette, import/export, keyboard shortcuts, remaining stories.
+### Phase 5: Polish (COMPLETE)
+Command palette, import/export, help view, remaining stories.
 
-**Planned deliverables:**
-- Command palette (Ctrl+K or `/` to open)
-- Data import/export (JSON)
-- Keyboard navigation improvements
-- Additional Storybook stories for Eat and Track components
-- Edge case handling, accessibility audit
-- Final bug sweep
+**Deliverables:**
+- `components/command-palette.js` — `<command-palette>` overlay triggered by Ctrl+K / Cmd+K
+- `components/help-view.js` — `<help-view>` static help/shortcuts page
+- `utils/data-io.js` — JSON export (all stores) and import (file picker, overwrites duplicates)
+- `utils/db.js` — Added `getAllRecipesRaw()`, `getAllLogEntries()`, `getAllCachedIngredients()`, `bulkPut()`
+- `app.js` — Wired command palette, `/help` route, palette-search handler, Ctrl+K listener
+- `index.html` — Added help view section and `<command-palette>` element
+- `styles/main.css` — Command palette overlay and help view styles
+- `stories/MacroPie.stories.js` — 7 stories (balanced, protein-heavy, carb-heavy, fat-heavy, empty, large, single)
+- `stories/CommandPalette.stories.js` — 5 stories with interaction tests (open, filter, no matches, arrow nav, escape)
+- `stories/HelpView.stories.js` — 1 story (default)
+
+**Command palette commands:**
+- `cook`, `eat`, `track` — navigate to sections
+- `add recipe` — navigate to new recipe form
+- `export data` — download JSON backup
+- `import data` — file picker, validate, overwrite duplicates
+- `search <query>` — filter cook grid by recipe name
+- `help`, `shortcuts` — navigate to help page
 
 ## Current File Inventory
 
@@ -130,6 +142,12 @@ Command palette, import/export, keyboard shortcuts, remaining stories.
 /stories/WeeklyTrend.stories.js — 5 stories
 /stories/AdhocFood.stories.js  — 2 stories
 /stories/TrackView.stories.js  — 1 story
+/components/command-palette.js  — <command-palette>
+/components/help-view.js       — <help-view>
+/utils/data-io.js              — Import/export (JSON)
+/stories/MacroPie.stories.js   — 7 stories
+/stories/CommandPalette.stories.js — 5 stories
+/stories/HelpView.stories.js   — 1 story
 /.storybook/main.js            — Storybook config
 /.storybook/preview.js         — Storybook preview (loads CSS)
 /docs/features.md              — Feature specs

@@ -5,6 +5,8 @@ import './components/recipe-form.js';
 import './components/recipe-view.js';
 import './components/eat-view.js';
 import './components/track-view.js';
+import './components/command-palette.js';
+import './components/help-view.js';
 
 // ── View Management ──
 
@@ -12,6 +14,7 @@ const views = {
   cook: document.getElementById('view-cook'),
   eat: document.getElementById('view-eat'),
   track: document.getElementById('view-track'),
+  help: document.getElementById('view-help'),
 };
 
 const navLinks = document.querySelectorAll('nav a[data-route]');
@@ -148,6 +151,66 @@ addRoute('/track', () => {
   showView('track');
   renderTrackView();
   setStatus('track — dashboard');
+});
+
+addRoute('/help', () => {
+  showView('help');
+  const view = views.help;
+  view.innerHTML = '';
+  const helpView = document.createElement('help-view');
+  view.appendChild(helpView);
+  setStatus('help');
+});
+
+// ── Command Palette ──
+
+function getPalette() {
+  return document.querySelector('command-palette');
+}
+
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    const palette = getPalette();
+    if (palette) {
+      if (palette.isOpen) {
+        palette.close();
+      } else {
+        palette.open();
+      }
+    }
+  }
+});
+
+// ── Palette Search: filter cook grid ──
+
+function escHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+window.addEventListener('palette-search', async (e) => {
+  const { query, matches } = e.detail;
+  const view = views.cook;
+  const grid = view.querySelector('#recipe-grid');
+  if (!grid) return;
+
+  grid.innerHTML = '';
+  if (matches.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <p>no recipes matching "${escHtml(query)}"</p>
+      </div>
+    `;
+  } else {
+    for (const recipe of matches) {
+      const card = document.createElement('recipe-card');
+      card.recipe = recipe;
+      grid.appendChild(card);
+    }
+  }
+  setStatus(`cook — search: "${query}" (${matches.length} results)`);
 });
 
 // ── Init ──
