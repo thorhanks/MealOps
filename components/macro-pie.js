@@ -1,8 +1,9 @@
 // Macro Triangle — radar triangle showing macro calorie balance
 
-const CX = 220;
+const CX = 250;
 const CY = 228;
-const VIEW = 440;
+const VIEW_W = 500;
+const VIEW_H = 440;
 const R = 146;            // radius of the triangle (center to vertex)
 const GRID_RINGS = 4;     // concentric reference triangles
 
@@ -56,7 +57,7 @@ class MacroPie extends HTMLElement {
     if (totalCal === 0) {
       this.innerHTML = `
         <div class="macro-rings">
-          <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
+          <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
             ${this._renderGrid()}
             <text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central"
               fill="#555" font-family="var(--font)" font-size="18">
@@ -113,24 +114,20 @@ class MacroPie extends HTMLElement {
       svg += `<line x1="${CX}" y1="${CY}" x2="${pt.x.toFixed(2)}" y2="${pt.y.toFixed(2)}" stroke="${MACROS[i].color}" stroke-width="1" opacity="0.3" />\n`;
     }
 
-    // Axis labels with percentage
+    // Axis labels with percentage and gram values
+    const grams = { protein: p, carbs: c, fat: f };
     for (const m of MACROS) {
       const lp = polar(m.angle, R + 24);
       const pctVal = Math.round(pcts[m.key] * 100);
       const anchor = m.angle === -90 ? 'middle' : m.angle < 0 ? 'start' : m.angle > 90 ? 'end' : 'start';
+      const dy = m.angle === -90 ? -1 : 1; // top label: gram line above, bottom labels: gram line below
       svg += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="16" font-weight="bold" text-anchor="${anchor}" dominant-baseline="central">${m.label}:${pctVal}%</text>\n`;
+      svg += `<text x="${lp.x.toFixed(2)}" y="${(lp.y + dy * 18).toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="13" text-anchor="${anchor}" dominant-baseline="central">${grams[m.key]}g</text>\n`;
     }
-
-    // Center readout — gram values
-    svg += `
-      <text x="${CX}" y="${CY - 14}" text-anchor="middle" fill="#c89664" font-family="var(--font)" font-size="14">P:${p}g</text>
-      <text x="${CX}" y="${CY + 3}" text-anchor="middle" fill="#ffb000" font-family="var(--font)" font-size="14">C:${c}g</text>
-      <text x="${CX}" y="${CY + 20}" text-anchor="middle" fill="#cc6600" font-family="var(--font)" font-size="14">F:${f}g</text>
-    `;
 
     this.innerHTML = `
       <div class="macro-rings">
-        <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
+        <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
           ${svg}
         </svg>
         <h3 class="prompt">daily macros</h3>
