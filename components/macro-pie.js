@@ -62,8 +62,8 @@ class MacroPie extends HTMLElement {
               fill="#555" font-family="var(--font)" font-size="18">
               no data
             </text>
+            <text x="${CX}" y="${VIEW - 8}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">daily macros</text>
           </svg>
-          <h3 class="prompt">daily macros</h3>
         </div>
       `;
       return;
@@ -128,8 +128,8 @@ class MacroPie extends HTMLElement {
       <div class="macro-rings">
         <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${svg}
+          <text x="${CX}" y="${VIEW - 8}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">daily macros</text>
         </svg>
-        <h3 class="prompt">daily macros</h3>
       </div>
     `;
   }

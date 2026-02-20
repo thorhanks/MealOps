@@ -117,6 +117,7 @@ class BodyGauge extends HTMLElement {
       <text x="${CX}" y="${CY - 14}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="34" font-weight="bold">${Math.round(current)}</text>
       <text x="${CX}" y="${CY + 11}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">/ ${Math.round(target)} ${label}</text>
       <text x="${CX}" y="${CY + 34}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="18">${pct}%</text>
+      <text x="${CX}" y="${VIEW - 6}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="11">daily calories</text>
     `;
 
     this.innerHTML = `
@@ -129,7 +130,6 @@ class BodyGauge extends HTMLElement {
           ${redline}
           ${centerText}
         </svg>
-        <h3 class="prompt">daily calories</h3>
       </div>
     `;
   }
