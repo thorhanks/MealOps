@@ -1,23 +1,42 @@
-// Weekly Trend — vertical segmented equalizer columns
+// Weekly Trend — radial sector display / radar diagnostics
 
-const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const SEGMENTS = 12;
-const SEG_H = 8;
-const SEG_GAP = 2;
-const COL_W = 24;
-const COL_GAP = 12;
-const COL_H = SEGMENTS * (SEG_H + SEG_GAP) - SEG_GAP; // total column pixel height
+const CX = 110;
+const CY = 110;
+const VIEW = 220;
+const R_INNER = 24;
+const R_OUTER = 82;
+const RING_H = (R_OUTER - R_INNER) / SEGMENTS;
+const SPOKE_ANGLE = 360 / 7; // ~51.43° per wedge
+const ARC_GAP = 1.5; // degrees gap between wedges (on each side)
+const RING_GAP = 1; // px radial gap between rings
 
-// Layout
-const MARGIN_LEFT = 32;
-const MARGIN_TOP = 18;
-const LABEL_Y = MARGIN_TOP + COL_H + 16;
-const CAL_Y = LABEL_Y + 14;
-const VIEW_W = MARGIN_LEFT + 7 * (COL_W + COL_GAP) - COL_GAP + 10;
-const VIEW_H = CAL_Y + 8;
+// Start from top (12 o'clock) and go clockwise
+const START_ANGLE = -90;
 
-// Target line is at 100% — maps to top of column area
-const TARGET_Y = MARGIN_TOP;
+function polar(angleDeg, r) {
+  const rad = (angleDeg * Math.PI) / 180;
+  return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
+}
+
+function arcSectorPath(aStart, aEnd, rInner, rOuter) {
+  // Draw a donut sector: inner arc → line to outer → outer arc back → close
+  const iS = polar(aStart, rInner);
+  const iE = polar(aEnd, rInner);
+  const oS = polar(aStart, rOuter);
+  const oE = polar(aEnd, rOuter);
+  const sweep = aEnd - aStart;
+  const large = sweep > 180 ? 1 : 0;
+
+  return [
+    `M ${iS.x.toFixed(2)} ${iS.y.toFixed(2)}`,
+    `A ${rInner} ${rInner} 0 ${large} 1 ${iE.x.toFixed(2)} ${iE.y.toFixed(2)}`,
+    `L ${oE.x.toFixed(2)} ${oE.y.toFixed(2)}`,
+    `A ${rOuter} ${rOuter} 0 ${large} 0 ${oS.x.toFixed(2)} ${oS.y.toFixed(2)}`,
+    'Z',
+  ].join(' ');
+}
 
 function segColor(index, total, over) {
   const ratio = index / (total - 1);
@@ -68,68 +87,85 @@ class WeeklyTrend extends HTMLElement {
 
     let svg = '';
 
-    // Target reference line — dashed horizontal at 100%
-    svg += `<line x1="${MARGIN_LEFT - 4}" y1="${TARGET_Y}" x2="${MARGIN_LEFT + 7 * (COL_W + COL_GAP) - COL_GAP + 4}" y2="${TARGET_Y}" stroke="#333" stroke-width="1" stroke-dasharray="3 3" />\n`;
-    svg += `<text x="${MARGIN_LEFT - 6}" y="${TARGET_Y + 4}" text-anchor="end" fill="#555" font-family="var(--font)" font-size="9">100%</text>\n`;
+    // Background reference rings
+    svg += `<circle cx="${CX}" cy="${CY}" r="${R_INNER - 2}" fill="none" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="2 3" />\n`;
+    svg += `<circle cx="${CX}" cy="${CY}" r="${R_OUTER + 2}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="2 3" />\n`;
 
-    // Columns
-    for (let col = 0; col < data.length && col < 7; col++) {
-      const d = data[col];
+    // 100% target circle
+    svg += `<circle cx="${CX}" cy="${CY}" r="${R_OUTER}" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="3 4" />\n`;
+
+    // Spoke divider lines — thin radial lines between wedges
+    for (let i = 0; i < 7; i++) {
+      const angle = START_ANGLE + i * SPOKE_ANGLE;
+      const p1 = polar(angle, R_INNER - 2);
+      const p2 = polar(angle, R_OUTER + 2);
+      svg += `<line x1="${p1.x.toFixed(2)}" y1="${p1.y.toFixed(2)}" x2="${p2.x.toFixed(2)}" y2="${p2.y.toFixed(2)}" stroke="#222" stroke-width="1" />\n`;
+    }
+
+    // Wedge sectors
+    for (let i = 0; i < data.length && i < 7; i++) {
+      const d = data[i];
+      const wedgeStart = START_ANGLE + i * SPOKE_ANGLE + ARC_GAP;
+      const wedgeEnd = START_ANGLE + (i + 1) * SPOKE_ANGLE - ARC_GAP;
       const pct = d.target > 0 ? d.calories / d.target : 0;
-      const cappedPct = Math.min(pct, 1.2); // cap visual at 120%
+      const cappedPct = Math.min(pct, 1.2);
       const litCount = Math.round(cappedPct * SEGMENTS);
       const isOver = pct > 1;
       const isSelected = d.isSelected;
 
-      const colX = MARGIN_LEFT + col * (COL_W + COL_GAP);
-
-      // Selected day highlight — subtle background rect
-      if (isSelected) {
-        svg += `<rect x="${colX - 2}" y="${MARGIN_TOP - 2}" width="${COL_W + 4}" height="${COL_H + 4}" fill="none" stroke="#ffb000" stroke-width="1" opacity="0.4" />\n`;
-      }
-
-      // Segments — bottom to top
+      // Arc segments — concentric rings within the wedge
       for (let seg = 0; seg < SEGMENTS; seg++) {
-        // seg 0 = bottom, seg SEGMENTS-1 = top
-        const y = MARGIN_TOP + COL_H - (seg + 1) * (SEG_H + SEG_GAP) + SEG_GAP;
+        const rIn = R_INNER + seg * RING_H + RING_GAP;
+        const rOut = R_INNER + (seg + 1) * RING_H - RING_GAP;
         const lit = seg < litCount;
-        const color = lit ? segColor(seg, SEGMENTS, isOver) : '#1a1a1a';
-        const opacity = lit ? 1 : 0.15;
+        const color = lit ? segColor(seg, SEGMENTS, isOver) : '#151515';
+        const opacity = lit ? 1 : 0.2;
 
-        svg += `<rect x="${colX}" y="${y}" width="${COL_W}" height="${SEG_H}" fill="${color}" opacity="${opacity}" style="transition:opacity .3s" />\n`;
+        const path = arcSectorPath(wedgeStart, wedgeEnd, rIn, rOut);
+        svg += `<path d="${path}" fill="${color}" opacity="${opacity}" style="transition:opacity .3s" />\n`;
       }
 
-      // Day label
-      const dayLabel = DAY_LABELS[col] || '?';
+      // Selected day highlight — faint overlay on full wedge
+      if (isSelected) {
+        const hlPath = arcSectorPath(wedgeStart - 0.5, wedgeEnd + 0.5, R_INNER - 1, R_OUTER + 1);
+        svg += `<path d="${hlPath}" fill="none" stroke="#ffb000" stroke-width="1.5" opacity="0.5" />\n`;
+      }
+
+      // Day label + percentage — stacked at wedge midpoint, beyond outer radius
+      const midAngle = START_ANGLE + (i + 0.5) * SPOKE_ANGLE;
+      const labelR = R_OUTER + 16;
+      const lp = polar(midAngle, labelR);
       const dayColor = isSelected ? '#ffb000' : '#665500';
-      svg += `<text x="${colX + COL_W / 2}" y="${LABEL_Y}" text-anchor="middle" fill="${dayColor}" font-family="var(--font)" font-size="10" font-weight="${isSelected ? 'bold' : 'normal'}">${dayLabel}</text>\n`;
-
-      // Calorie value
+      const fontWeight = isSelected ? 'bold' : 'normal';
       const cal = Math.round(d.calories);
-      const calColor = isOver ? '#cc3300' : '#555';
-      svg += `<text x="${colX + COL_W / 2}" y="${CAL_Y}" text-anchor="middle" fill="${calColor}" font-family="var(--font)" font-size="9">${cal > 0 ? cal : '-'}</text>\n`;
+      const pctText = cal > 0 ? Math.round(pct * 100) + '%' : '';
+      const pctColor = isOver ? '#cc3300' : '#555';
 
-      // Percentage above column
-      if (cal > 0) {
-        const pctText = Math.round(pct * 100) + '%';
-        const pctColor = isOver ? '#cc3300' : '#665500';
-        svg += `<text x="${colX + COL_W / 2}" y="${MARGIN_TOP - 4}" text-anchor="middle" fill="${pctColor}" font-family="var(--font)" font-size="8">${pctText}</text>\n`;
+      svg += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" text-anchor="middle" fill="${dayColor}" font-family="var(--font)" font-size="9" font-weight="${fontWeight}">`;
+      svg += `<tspan x="${lp.x.toFixed(2)}" dy="-0.4em">${DAY_LABELS[i]}</tspan>`;
+      if (pctText) {
+        svg += `<tspan x="${lp.x.toFixed(2)}" dy="1.1em" fill="${pctColor}" font-size="7" font-weight="normal">${pctText}</tspan>`;
       }
+      svg += `</text>\n`;
 
-      // Clickable hit area covering column + labels
-      svg += `<rect x="${colX - COL_GAP / 2}" y="0" width="${COL_W + COL_GAP}" height="${VIEW_H}" fill="transparent" data-day="${col}" style="cursor:pointer" />\n`;
+      // Clickable hit area — invisible wedge
+      const hitPath = arcSectorPath(wedgeStart - ARC_GAP, wedgeEnd + ARC_GAP, R_INNER - 6, R_OUTER + 28);
+      svg += `<path d="${hitPath}" fill="transparent" data-day="${i}" style="cursor:pointer" />\n`;
     }
+
+    // Center label
+    svg += `<text x="${CX}" y="${CY + 1}" text-anchor="middle" dominant-baseline="central" fill="#555" font-family="var(--font)" font-size="8">weekly</text>\n`;
 
     this.innerHTML = `
       <div class="weekly-trend">
         <h3 class="prompt">weekly trend${label}</h3>
-        <svg class="weekly-trend__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
+        <svg class="weekly-trend__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${svg}
         </svg>
       </div>
     `;
 
-    // Click handlers for day columns
+    // Click handlers for day wedges
     this.querySelectorAll('[data-day]').forEach((el) => {
       el.addEventListener('click', () => {
         const dayIndex = parseInt(el.dataset.day, 10);

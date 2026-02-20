@@ -154,22 +154,12 @@ class MacroPie extends HTMLElement {
       <text x="${CX}" y="${CY + 16}" text-anchor="middle" fill="#cc6600" font-family="var(--font)" font-size="10" font-weight="bold">F:${f}g</text>
     `;
 
-    // Legend below SVG — ring labels with percentages
-    const legendHTML = `
-      <div class="macro-rings__legend">
-        <span class="macro-rings__legend-item" style="color:#00cc00">protein ${pPct}%</span>
-        <span class="macro-rings__legend-item" style="color:#ffb000">carbs ${cPct}%</span>
-        <span class="macro-rings__legend-item" style="color:#cc6600">fat ${fPct}%</span>
-      </div>
-    `;
-
     this.innerHTML = `
       <div class="macro-rings">
         <h3 class="prompt">daily macros</h3>
         <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${svgContent}
         </svg>
-        ${legendHTML}
       </div>
     `;
   }

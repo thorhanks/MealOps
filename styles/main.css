@@ -784,8 +784,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .body-gauge__svg {
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 220px;
 }
 
 /* Macro Rings — concentric reactor core */
@@ -797,8 +797,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .macro-rings__svg {
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 220px;
 }
 
 .macro-rings__legend {
@@ -945,7 +945,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 /* Weekly Trend */
-/* Weekly Trend — vertical segmented equalizer */
+/* Weekly Trend — radial spoke wheel */
 .weekly-trend {
   display: flex;
   flex-direction: column;
@@ -959,8 +959,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .weekly-trend__svg {
-  width: 312px;
-  height: auto;
+  width: 220px;
+  height: 220px;
 }
 
 /* ── Command Palette ── */
