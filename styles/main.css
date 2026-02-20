@@ -824,6 +824,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .consumption-log {
+  margin-top: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
 }
 

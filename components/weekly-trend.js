@@ -78,8 +78,8 @@ class WeeklyTrend extends HTMLElement {
     if (!data || data.length === 0) {
       this.innerHTML = `
         <div class="weekly-trend">
-          <h3 class="prompt">weekly trend${label}</h3>
           <div class="weekly-trend__empty">no data</div>
+          <h3 class="prompt">weekly trend${label}</h3>
         </div>
       `;
       return;
@@ -163,10 +163,10 @@ class WeeklyTrend extends HTMLElement {
 
     this.innerHTML = `
       <div class="weekly-trend">
-        <h3 class="prompt">weekly trend${label}</h3>
         <svg class="weekly-trend__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${svg}
         </svg>
+        <h3 class="prompt">weekly trend${label}</h3>
       </div>
     `;
 

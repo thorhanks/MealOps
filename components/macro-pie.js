@@ -75,7 +75,6 @@ class MacroPie extends HTMLElement {
     if (totalCal === 0) {
       this.innerHTML = `
         <div class="macro-rings">
-          <h3 class="prompt">daily macros</h3>
           <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
             ${this._renderEmptyRings()}
             <text x="${CX}" y="${CY + 4}" text-anchor="middle"
@@ -83,6 +82,7 @@ class MacroPie extends HTMLElement {
               no data
             </text>
           </svg>
+          <h3 class="prompt">daily macros</h3>
         </div>
       `;
       return;
@@ -156,10 +156,10 @@ class MacroPie extends HTMLElement {
 
     this.innerHTML = `
       <div class="macro-rings">
-        <h3 class="prompt">daily macros</h3>
         <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${svgContent}
         </svg>
+        <h3 class="prompt">daily macros</h3>
       </div>
     `;
   }

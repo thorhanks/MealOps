@@ -121,7 +121,6 @@ class BodyGauge extends HTMLElement {
 
     this.innerHTML = `
       <div class="body-gauge ${isOver ? 'body-gauge--over' : ''}">
-        <h3 class="prompt">daily calories</h3>
         <svg class="body-gauge__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${track}
           ${innerRing}
@@ -130,6 +129,7 @@ class BodyGauge extends HTMLElement {
           ${redline}
           ${centerText}
         </svg>
+        <h3 class="prompt">daily calories</h3>
       </div>
     `;
   }
