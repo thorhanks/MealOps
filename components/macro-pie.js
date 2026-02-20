@@ -2,22 +2,22 @@
 
 const ARC_START = 135;   // degrees — bottom-left (matches body-gauge)
 const ARC_SWEEP = 270;   // 270° sweep to bottom-right
-const CX = 100;
-const CY = 100;
-const VIEW = 200;
+const CX = 140;
+const CY = 140;
+const VIEW = 280;
 const SEGMENTS = 20;
 const GAP_DEG = 3;
 const SEG_DEG = (ARC_SWEEP / SEGMENTS) - GAP_DEG;
-const STROKE_W = 8;
+const STROKE_W = 11;
 
 // Calorie multipliers
 const CAL_PER_G = { protein: 4, carbs: 4, fat: 9 };
 
 // Ring definitions — outer to inner
 const RINGS = [
-  { key: 'protein', label: 'P', r: 80, colors: ['#003300', '#006600', '#00cc00'], dimColor: '#001a00' },
-  { key: 'carbs',   label: 'C', r: 60, colors: ['#664400', '#aa7700', '#ffb000'], dimColor: '#1a1200' },
-  { key: 'fat',     label: 'F', r: 40, colors: ['#442200', '#884400', '#cc6600'], dimColor: '#1a0e00' },
+  { key: 'protein', label: 'P', r: 112, colors: ['#003300', '#006600', '#00cc00'], dimColor: '#001a00' },
+  { key: 'carbs',   label: 'C', r: 84, colors: ['#664400', '#aa7700', '#ffb000'], dimColor: '#1a1200' },
+  { key: 'fat',     label: 'F', r: 56, colors: ['#442200', '#884400', '#cc6600'], dimColor: '#1a0e00' },
 ];
 
 function polar(angleDeg, r) {
@@ -79,7 +79,7 @@ class MacroPie extends HTMLElement {
           <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
             ${this._renderEmptyRings()}
             <text x="${CX}" y="${CY + 4}" text-anchor="middle"
-              fill="#555" font-family="var(--font)" font-size="10">
+              fill="#555" font-family="var(--font)" font-size="14">
               no data
             </text>
           </svg>
@@ -93,15 +93,15 @@ class MacroPie extends HTMLElement {
 
     // Background tracks for each ring
     for (const ring of RINGS) {
-      svgContent += `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, ring.r)}" fill="none" stroke="#1a1a1a" stroke-width="${STROKE_W + 2}" stroke-linecap="butt" />\n`;
+      svgContent += `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, ring.r)}" fill="none" stroke="#1a1a1a" stroke-width="${STROKE_W + 3}" stroke-linecap="butt" />\n`;
     }
 
     // Inner dashed reference ring
-    const innerR = RINGS[2].r - STROKE_W / 2 - 4;
+    const innerR = RINGS[2].r - STROKE_W / 2 - 6;
     svgContent += `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, innerR)}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="2 3" />\n`;
 
     // Outer dashed reference ring
-    const outerR = RINGS[0].r + STROKE_W / 2 + 4;
+    const outerR = RINGS[0].r + STROKE_W / 2 + 6;
     svgContent += `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, outerR)}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="2 3" />\n`;
 
     // Segments for each ring
@@ -131,15 +131,15 @@ class MacroPie extends HTMLElement {
       const angle = ARC_START + (t.pct / 100) * ARC_SWEEP;
       const isMajor = t.lbl !== '';
       const rInner = RINGS[0].r + STROKE_W / 2 + 1;
-      const rOuter = RINGS[0].r + STROKE_W / 2 + (isMajor ? 7 : 4);
+      const rOuter = RINGS[0].r + STROKE_W / 2 + (isMajor ? 10 : 6);
       const p1 = polar(angle, rInner);
       const p2 = polar(angle, rOuter);
 
       svgContent += `<line x1="${p1.x.toFixed(2)}" y1="${p1.y.toFixed(2)}" x2="${p2.x.toFixed(2)}" y2="${p2.y.toFixed(2)}" stroke="#444" stroke-width="1" />\n`;
 
       if (isMajor) {
-        const lp = polar(angle, rOuter + 7);
-        svgContent += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="#555" font-family="var(--font)" font-size="7" text-anchor="middle" dominant-baseline="central">${t.lbl}</text>\n`;
+        const lp = polar(angle, rOuter + 10);
+        svgContent += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="#555" font-family="var(--font)" font-size="10" text-anchor="middle" dominant-baseline="central">${t.lbl}</text>\n`;
       }
     }
 
@@ -149,9 +149,9 @@ class MacroPie extends HTMLElement {
     const fPct = Math.round(macroPcts.fat * 100);
 
     svgContent += `
-      <text x="${CX}" y="${CY - 14}" text-anchor="middle" fill="#00cc00" font-family="var(--font)" font-size="10" font-weight="bold">P:${p}g</text>
-      <text x="${CX}" y="${CY + 1}" text-anchor="middle" fill="#ffb000" font-family="var(--font)" font-size="10" font-weight="bold">C:${c}g</text>
-      <text x="${CX}" y="${CY + 16}" text-anchor="middle" fill="#cc6600" font-family="var(--font)" font-size="10" font-weight="bold">F:${f}g</text>
+      <text x="${CX}" y="${CY - 20}" text-anchor="middle" fill="#00cc00" font-family="var(--font)" font-size="14" font-weight="bold">P:${p}g</text>
+      <text x="${CX}" y="${CY + 1}" text-anchor="middle" fill="#ffb000" font-family="var(--font)" font-size="14" font-weight="bold">C:${c}g</text>
+      <text x="${CX}" y="${CY + 22}" text-anchor="middle" fill="#cc6600" font-family="var(--font)" font-size="14" font-weight="bold">F:${f}g</text>
     `;
 
     this.innerHTML = `
