@@ -2,11 +2,11 @@
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const SEGMENTS = 12;
-const CX = 110;
-const CY = 110;
-const VIEW = 220;
-const R_INNER = 24;
-const R_OUTER = 82;
+const CX = 154;
+const CY = 154;
+const VIEW = 308;
+const R_INNER = 34;
+const R_OUTER = 115;
 const RING_H = (R_OUTER - R_INNER) / SEGMENTS;
 const SPOKE_ANGLE = 360 / 7; // ~51.43° per wedge
 const ARC_GAP = 1.5; // degrees gap between wedges (on each side)
@@ -78,8 +78,8 @@ class WeeklyTrend extends HTMLElement {
     if (!data || data.length === 0) {
       this.innerHTML = `
         <div class="weekly-trend">
-          <h3 class="prompt">weekly trend${label}</h3>
           <div class="weekly-trend__empty">no data</div>
+          <h3 class="prompt">weekly trend${label}</h3>
         </div>
       `;
       return;
@@ -88,8 +88,8 @@ class WeeklyTrend extends HTMLElement {
     let svg = '';
 
     // Background reference rings
-    svg += `<circle cx="${CX}" cy="${CY}" r="${R_INNER - 2}" fill="none" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="2 3" />\n`;
-    svg += `<circle cx="${CX}" cy="${CY}" r="${R_OUTER + 2}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="2 3" />\n`;
+    svg += `<circle cx="${CX}" cy="${CY}" r="${R_INNER - 3}" fill="none" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="2 3" />\n`;
+    svg += `<circle cx="${CX}" cy="${CY}" r="${R_OUTER + 3}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="2 3" />\n`;
 
     // 100% target circle
     svg += `<circle cx="${CX}" cy="${CY}" r="${R_OUTER}" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="3 4" />\n`;
@@ -97,8 +97,8 @@ class WeeklyTrend extends HTMLElement {
     // Spoke divider lines — thin radial lines between wedges
     for (let i = 0; i < 7; i++) {
       const angle = START_ANGLE + i * SPOKE_ANGLE;
-      const p1 = polar(angle, R_INNER - 2);
-      const p2 = polar(angle, R_OUTER + 2);
+      const p1 = polar(angle, R_INNER - 3);
+      const p2 = polar(angle, R_OUTER + 35);
       svg += `<line x1="${p1.x.toFixed(2)}" y1="${p1.y.toFixed(2)}" x2="${p2.x.toFixed(2)}" y2="${p2.y.toFixed(2)}" stroke="#222" stroke-width="1" />\n`;
     }
 
@@ -112,6 +112,11 @@ class WeeklyTrend extends HTMLElement {
       const litCount = Math.round(cappedPct * SEGMENTS);
       const isOver = pct > 1;
       const isSelected = d.isSelected;
+
+      // Wedge background — subtle alternating tint
+      const bgColor = i % 2 === 0 ? '#2a1f00' : '#1a1400';
+      const bgPath = arcSectorPath(wedgeStart, wedgeEnd, R_INNER, R_OUTER);
+      svg += `<path d="${bgPath}" fill="${bgColor}" opacity="0.6" />\n`;
 
       // Arc segments — concentric rings within the wedge
       for (let seg = 0; seg < SEGMENTS; seg++) {
@@ -127,13 +132,13 @@ class WeeklyTrend extends HTMLElement {
 
       // Selected day highlight — faint overlay on full wedge
       if (isSelected) {
-        const hlPath = arcSectorPath(wedgeStart - 0.5, wedgeEnd + 0.5, R_INNER - 1, R_OUTER + 1);
+        const hlPath = arcSectorPath(wedgeStart - 0.5, wedgeEnd + 0.5, R_INNER - 2, R_OUTER + 2);
         svg += `<path d="${hlPath}" fill="none" stroke="#ffb000" stroke-width="1.5" opacity="0.5" />\n`;
       }
 
       // Day label + percentage — stacked at wedge midpoint, beyond outer radius
       const midAngle = START_ANGLE + (i + 0.5) * SPOKE_ANGLE;
-      const labelR = R_OUTER + 16;
+      const labelR = R_OUTER + 28;
       const lp = polar(midAngle, labelR);
       const dayColor = isSelected ? '#ffb000' : '#665500';
       const fontWeight = isSelected ? 'bold' : 'normal';
@@ -141,27 +146,27 @@ class WeeklyTrend extends HTMLElement {
       const pctText = cal > 0 ? Math.round(pct * 100) + '%' : '';
       const pctColor = isOver ? '#cc3300' : '#555';
 
-      svg += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" text-anchor="middle" fill="${dayColor}" font-family="var(--font)" font-size="9" font-weight="${fontWeight}">`;
+      svg += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" text-anchor="middle" fill="${dayColor}" font-family="var(--font)" font-size="13" font-weight="${fontWeight}">`;
       svg += `<tspan x="${lp.x.toFixed(2)}" dy="-0.4em">${DAY_LABELS[i]}</tspan>`;
       if (pctText) {
-        svg += `<tspan x="${lp.x.toFixed(2)}" dy="1.1em" fill="${pctColor}" font-size="7" font-weight="normal">${pctText}</tspan>`;
+        svg += `<tspan x="${lp.x.toFixed(2)}" dy="1.1em" fill="${pctColor}" font-size="10" font-weight="normal">${pctText}</tspan>`;
       }
       svg += `</text>\n`;
 
       // Clickable hit area — invisible wedge
-      const hitPath = arcSectorPath(wedgeStart - ARC_GAP, wedgeEnd + ARC_GAP, R_INNER - 6, R_OUTER + 28);
+      const hitPath = arcSectorPath(wedgeStart - ARC_GAP, wedgeEnd + ARC_GAP, R_INNER - 8, R_OUTER + 39);
       svg += `<path d="${hitPath}" fill="transparent" data-day="${i}" style="cursor:pointer" />\n`;
     }
 
     // Center label
-    svg += `<text x="${CX}" y="${CY + 1}" text-anchor="middle" dominant-baseline="central" fill="#555" font-family="var(--font)" font-size="8">weekly</text>\n`;
+    svg += `<text x="${CX}" y="${CY + 1}" text-anchor="middle" dominant-baseline="central" fill="#555" font-family="var(--font)" font-size="11">weekly</text>\n`;
 
     this.innerHTML = `
       <div class="weekly-trend">
-        <h3 class="prompt">weekly trend${label}</h3>
         <svg class="weekly-trend__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${svg}
         </svg>
+        <h3 class="prompt">weekly trend${label}</h3>
       </div>
     `;
 

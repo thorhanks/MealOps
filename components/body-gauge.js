@@ -6,11 +6,11 @@ const ARC_SWEEP = 270;   // 270° sweep to bottom-right
 const GAP_DEG = 2.5;
 const SEG_DEG = (ARC_SWEEP / SEGMENTS) - GAP_DEG;
 
-const CX = 100;
-const CY = 100;
-const R = 76;
-const STROKE_W = 10;
-const VIEW = 200;
+const CX = 140;
+const CY = 140;
+const R = 106;
+const STROKE_W = 14;
+const VIEW = 280;
 
 function polar(angleDeg, r = R) {
   const rad = (angleDeg * Math.PI) / 180;
@@ -89,7 +89,7 @@ class BodyGauge extends HTMLElement {
       const angle = ARC_START + (t.pct / 100) * ARC_SWEEP;
       const isMajor = t.lbl !== '';
       const rInner = R + STROKE_W / 2 + 1;
-      const rOuter = R + STROKE_W / 2 + (isMajor ? 8 : 5);
+      const rOuter = R + STROKE_W / 2 + (isMajor ? 11 : 7);
       const p1 = polar(angle, rInner);
       const p2 = polar(angle, rOuter);
 
@@ -98,30 +98,29 @@ class BodyGauge extends HTMLElement {
       );
 
       if (isMajor) {
-        const lp = polar(angle, rOuter + 8);
+        const lp = polar(angle, rOuter + 11);
         ticks.push(
-          `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="#665500" font-family="var(--font)" font-size="8" text-anchor="middle" dominant-baseline="central">${t.lbl}</text>`
+          `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="#665500" font-family="var(--font)" font-size="11" text-anchor="middle" dominant-baseline="central">${t.lbl}</text>`
         );
       }
     }
 
     // Redline marker at 100%
     const redAngle = ARC_START + ARC_SWEEP;
-    const rl1 = polar(redAngle, R - STROKE_W / 2 - 3);
-    const rl2 = polar(redAngle, R + STROKE_W / 2 + 3);
+    const rl1 = polar(redAngle, R - STROKE_W / 2 - 4);
+    const rl2 = polar(redAngle, R + STROKE_W / 2 + 4);
     const redline = `<line x1="${rl1.x.toFixed(2)}" y1="${rl1.y.toFixed(2)}" x2="${rl2.x.toFixed(2)}" y2="${rl2.y.toFixed(2)}" stroke="${isOver ? '#cc3300' : '#aa7700'}" stroke-width="2" />`;
 
     // Center readout
     const numColor = isOver ? '#cc3300' : '#ffb000';
     const centerText = `
-      <text x="${CX}" y="${CY - 10}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="24" font-weight="bold">${Math.round(current)}</text>
-      <text x="${CX}" y="${CY + 8}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="10">/ ${Math.round(target)} ${label}</text>
-      <text x="${CX}" y="${CY + 24}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="13">${pct}%</text>
+      <text x="${CX}" y="${CY - 14}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="34" font-weight="bold">${Math.round(current)}</text>
+      <text x="${CX}" y="${CY + 11}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">/ ${Math.round(target)} ${label}</text>
+      <text x="${CX}" y="${CY + 34}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="18">${pct}%</text>
     `;
 
     this.innerHTML = `
       <div class="body-gauge ${isOver ? 'body-gauge--over' : ''}">
-        <h3 class="prompt">daily calories</h3>
         <svg class="body-gauge__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${track}
           ${innerRing}
@@ -130,6 +129,7 @@ class BodyGauge extends HTMLElement {
           ${redline}
           ${centerText}
         </svg>
+        <h3 class="prompt">daily calories</h3>
       </div>
     `;
   }

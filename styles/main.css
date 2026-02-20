@@ -784,8 +784,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .body-gauge__svg {
-  width: 220px;
-  height: 220px;
+  width: 308px;
+  height: 308px;
 }
 
 /* Macro Rings — concentric reactor core */
@@ -797,8 +797,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .macro-rings__svg {
-  width: 220px;
-  height: 220px;
+  width: 370px;
+  height: 370px;
 }
 
 .macro-rings__legend {
@@ -824,6 +824,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .consumption-log {
+  margin-top: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
 }
 
@@ -959,8 +960,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .weekly-trend__svg {
-  width: 220px;
-  height: 220px;
+  width: 308px;
+  height: 308px;
 }
 
 /* ── Command Palette ── */

@@ -1,23 +1,19 @@
-// Macro Rings — concentric reactor core style macro visualization
+// Macro Triangle — radar triangle showing macro calorie balance
 
-const ARC_START = 135;   // degrees — bottom-left (matches body-gauge)
-const ARC_SWEEP = 270;   // 270° sweep to bottom-right
-const CX = 100;
-const CY = 100;
-const VIEW = 200;
-const SEGMENTS = 20;
-const GAP_DEG = 3;
-const SEG_DEG = (ARC_SWEEP / SEGMENTS) - GAP_DEG;
-const STROKE_W = 8;
+const CX = 220;
+const CY = 228;
+const VIEW = 440;
+const R = 146;            // radius of the triangle (center to vertex)
+const GRID_RINGS = 4;     // concentric reference triangles
 
 // Calorie multipliers
 const CAL_PER_G = { protein: 4, carbs: 4, fat: 9 };
 
-// Ring definitions — outer to inner
-const RINGS = [
-  { key: 'protein', label: 'P', r: 80, colors: ['#003300', '#006600', '#00cc00'], dimColor: '#001a00' },
-  { key: 'carbs',   label: 'C', r: 60, colors: ['#664400', '#aa7700', '#ffb000'], dimColor: '#1a1200' },
-  { key: 'fat',     label: 'F', r: 40, colors: ['#442200', '#884400', '#cc6600'], dimColor: '#1a0e00' },
+// Macro definitions — vertices at 120° apart, starting from top
+const MACROS = [
+  { key: 'protein', label: 'Protein', color: '#c89664', angle: -90 },
+  { key: 'carbs',   label: 'Carbs',   color: '#ffb000', angle: 30 },
+  { key: 'fat',     label: 'Fat',     color: '#cc6600', angle: 150 },
 ];
 
 function polar(angleDeg, r) {
@@ -25,18 +21,9 @@ function polar(angleDeg, r) {
   return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
 }
 
-function arcPath(startDeg, endDeg, r) {
-  const s = polar(startDeg, r);
-  const e = polar(endDeg, r);
-  const large = (endDeg - startDeg) > 180 ? 1 : 0;
-  return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
-}
-
-function segColor(index, total, colors) {
-  const ratio = index / (total - 1);
-  if (ratio < 0.5) return colors[0];
-  if (ratio < 0.8) return colors[1];
-  return colors[2];
+function trianglePath(r) {
+  const pts = MACROS.map(m => polar(m.angle, r));
+  return `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)} L ${pts[1].x.toFixed(2)} ${pts[1].y.toFixed(2)} L ${pts[2].x.toFixed(2)} ${pts[2].y.toFixed(2)} Z`;
 }
 
 class MacroPie extends HTMLElement {
@@ -60,119 +47,139 @@ class MacroPie extends HTMLElement {
     const c = Math.round(d.carbs);
     const f = Math.round(d.fat);
 
-    // Calculate calorie contributions
     const pCal = p * CAL_PER_G.protein;
     const cCal = c * CAL_PER_G.carbs;
     const fCal = f * CAL_PER_G.fat;
     const totalCal = pCal + cCal + fCal;
 
-    const macroGrams = { protein: p, carbs: c, fat: f };
-    const macroPcts = totalCal > 0
-      ? { protein: pCal / totalCal, carbs: cCal / totalCal, fat: fCal / totalCal }
-      : { protein: 0, carbs: 0, fat: 0 };
-
     // Empty state
     if (totalCal === 0) {
       this.innerHTML = `
         <div class="macro-rings">
-          <h3 class="prompt">daily macros</h3>
           <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
-            ${this._renderEmptyRings()}
-            <text x="${CX}" y="${CY + 4}" text-anchor="middle"
-              fill="#555" font-family="var(--font)" font-size="10">
+            ${this._renderGrid()}
+            <text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central"
+              fill="#555" font-family="var(--font)" font-size="18">
               no data
             </text>
           </svg>
+          <h3 class="prompt">daily macros</h3>
         </div>
       `;
       return;
     }
 
-    // Build SVG content
-    let svgContent = '';
+    const pcts = {
+      protein: pCal / totalCal,
+      carbs: cCal / totalCal,
+      fat: fCal / totalCal,
+    };
 
-    // Background tracks for each ring
-    for (const ring of RINGS) {
-      svgContent += `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, ring.r)}" fill="none" stroke="#1a1a1a" stroke-width="${STROKE_W + 2}" stroke-linecap="butt" />\n`;
+    let svg = '';
+
+    // Grid: concentric reference triangles + spokes
+    svg += this._renderGrid();
+
+    // Data polygon — each vertex extends along its axis proportional to its share
+    // Normalize: a perfectly balanced split (33/33/33) fills to ~33% of each axis
+    // Scale so that the dominant macro reaching 100% fills the full radius
+    const dataPoints = MACROS.map(m => {
+      const ratio = pcts[m.key];
+      return polar(m.angle, ratio * R);
+    });
+
+    const dataPath = `M ${dataPoints[0].x.toFixed(2)} ${dataPoints[0].y.toFixed(2)} L ${dataPoints[1].x.toFixed(2)} ${dataPoints[1].y.toFixed(2)} L ${dataPoints[2].x.toFixed(2)} ${dataPoints[2].y.toFixed(2)} Z`;
+
+    // Filled polygon
+    svg += `<path d="${dataPath}" fill="#ffb000" fill-opacity="0.08" stroke="none" />\n`;
+
+    // Segmented edges — each edge colored by its destination vertex's macro color
+    for (let i = 0; i < MACROS.length; i++) {
+      const from = dataPoints[i];
+      const to = dataPoints[(i + 1) % MACROS.length];
+      const edgeColor = MACROS[(i + 1) % MACROS.length].color;
+      svg += this._segmentedLine(from, to, edgeColor, 8);
     }
 
-    // Inner dashed reference ring
-    const innerR = RINGS[2].r - STROKE_W / 2 - 4;
-    svgContent += `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, innerR)}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="2 3" />\n`;
-
-    // Outer dashed reference ring
-    const outerR = RINGS[0].r + STROKE_W / 2 + 4;
-    svgContent += `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, outerR)}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="2 3" />\n`;
-
-    // Segments for each ring
-    for (const ring of RINGS) {
-      const fillRatio = macroPcts[ring.key];
-      const litCount = Math.round(fillRatio * SEGMENTS);
-
-      for (let i = 0; i < SEGMENTS; i++) {
-        const a0 = ARC_START + i * (SEG_DEG + GAP_DEG);
-        const a1 = a0 + SEG_DEG;
-        const lit = i < litCount;
-        const color = lit ? segColor(i, SEGMENTS, ring.colors) : ring.dimColor;
-        const opacity = lit ? 1 : 0.15;
-
-        svgContent += `<path d="${arcPath(a0, a1, ring.r)}" fill="none" stroke="${color}" stroke-width="${STROKE_W}" stroke-linecap="butt" opacity="${opacity}" style="transition:opacity .3s" />\n`;
-      }
+    // Vertex dots on data polygon
+    for (let i = 0; i < MACROS.length; i++) {
+      const pt = dataPoints[i];
+      svg += `<circle cx="${pt.x.toFixed(2)}" cy="${pt.y.toFixed(2)}" r="4" fill="${MACROS[i].color}" />\n`;
     }
 
-    // Tick marks on outer ring only
-    const tickDefs = [
-      { pct: 0, lbl: '0' },
-      { pct: 50, lbl: '' },
-      { pct: 100, lbl: '100' },
-    ];
-
-    for (const t of tickDefs) {
-      const angle = ARC_START + (t.pct / 100) * ARC_SWEEP;
-      const isMajor = t.lbl !== '';
-      const rInner = RINGS[0].r + STROKE_W / 2 + 1;
-      const rOuter = RINGS[0].r + STROKE_W / 2 + (isMajor ? 7 : 4);
-      const p1 = polar(angle, rInner);
-      const p2 = polar(angle, rOuter);
-
-      svgContent += `<line x1="${p1.x.toFixed(2)}" y1="${p1.y.toFixed(2)}" x2="${p2.x.toFixed(2)}" y2="${p2.y.toFixed(2)}" stroke="#444" stroke-width="1" />\n`;
-
-      if (isMajor) {
-        const lp = polar(angle, rOuter + 7);
-        svgContent += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="#555" font-family="var(--font)" font-size="7" text-anchor="middle" dominant-baseline="central">${t.lbl}</text>\n`;
-      }
+    // Lines from center to data points (spokes through data)
+    for (let i = 0; i < MACROS.length; i++) {
+      const pt = dataPoints[i];
+      svg += `<line x1="${CX}" y1="${CY}" x2="${pt.x.toFixed(2)}" y2="${pt.y.toFixed(2)}" stroke="${MACROS[i].color}" stroke-width="1" opacity="0.3" />\n`;
     }
 
-    // Center readout — stacked macro values
-    const pPct = Math.round(macroPcts.protein * 100);
-    const cPct = Math.round(macroPcts.carbs * 100);
-    const fPct = Math.round(macroPcts.fat * 100);
+    // Axis labels with percentage
+    for (const m of MACROS) {
+      const lp = polar(m.angle, R + 24);
+      const pctVal = Math.round(pcts[m.key] * 100);
+      const anchor = m.angle === -90 ? 'middle' : m.angle < 0 ? 'start' : m.angle > 90 ? 'end' : 'start';
+      svg += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="16" font-weight="bold" text-anchor="${anchor}" dominant-baseline="central">${m.label}:${pctVal}%</text>\n`;
+    }
 
-    svgContent += `
-      <text x="${CX}" y="${CY - 14}" text-anchor="middle" fill="#00cc00" font-family="var(--font)" font-size="10" font-weight="bold">P:${p}g</text>
-      <text x="${CX}" y="${CY + 1}" text-anchor="middle" fill="#ffb000" font-family="var(--font)" font-size="10" font-weight="bold">C:${c}g</text>
-      <text x="${CX}" y="${CY + 16}" text-anchor="middle" fill="#cc6600" font-family="var(--font)" font-size="10" font-weight="bold">F:${f}g</text>
+    // Center readout — gram values
+    svg += `
+      <text x="${CX}" y="${CY - 14}" text-anchor="middle" fill="#c89664" font-family="var(--font)" font-size="14">P:${p}g</text>
+      <text x="${CX}" y="${CY + 3}" text-anchor="middle" fill="#ffb000" font-family="var(--font)" font-size="14">C:${c}g</text>
+      <text x="${CX}" y="${CY + 20}" text-anchor="middle" fill="#cc6600" font-family="var(--font)" font-size="14">F:${f}g</text>
     `;
 
     this.innerHTML = `
       <div class="macro-rings">
-        <h3 class="prompt">daily macros</h3>
         <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
-          ${svgContent}
+          ${svg}
         </svg>
+        <h3 class="prompt">daily macros</h3>
       </div>
     `;
   }
 
-  _renderEmptyRings() {
+  _renderGrid() {
     let svg = '';
-    for (const ring of RINGS) {
-      svg += `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, ring.r)}" fill="none" stroke="#1a1a1a" stroke-width="${STROKE_W + 2}" stroke-linecap="butt" />\n`;
-      for (let i = 0; i < SEGMENTS; i++) {
-        const a0 = ARC_START + i * (SEG_DEG + GAP_DEG);
-        const a1 = a0 + SEG_DEG;
-        svg += `<path d="${arcPath(a0, a1, ring.r)}" fill="none" stroke="${ring.dimColor}" stroke-width="${STROKE_W}" stroke-linecap="butt" opacity="0.15" />\n`;
+
+    // Concentric reference triangles
+    for (let i = 1; i <= GRID_RINGS; i++) {
+      const r = (i / GRID_RINGS) * R;
+      svg += `<path d="${trianglePath(r)}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="${i === GRID_RINGS ? 'none' : '2 3'}" />\n`;
+    }
+
+    // Spoke lines from center to each vertex
+    for (const m of MACROS) {
+      const vx = polar(m.angle, R);
+      svg += `<line x1="${CX}" y1="${CY}" x2="${vx.x.toFixed(2)}" y2="${vx.y.toFixed(2)}" stroke="#222" stroke-width="1" />\n`;
+    }
+
+    // Tick marks along spokes
+    for (const m of MACROS) {
+      for (let i = 1; i <= GRID_RINGS; i++) {
+        const r = (i / GRID_RINGS) * R;
+        const tp = polar(m.angle, r);
+        // Small perpendicular tick
+        const perpAngle = m.angle + 90;
+        const t1 = { x: tp.x + 4 * Math.cos(perpAngle * Math.PI / 180), y: tp.y + 4 * Math.sin(perpAngle * Math.PI / 180) };
+        const t2 = { x: tp.x - 4 * Math.cos(perpAngle * Math.PI / 180), y: tp.y - 4 * Math.sin(perpAngle * Math.PI / 180) };
+        svg += `<line x1="${t1.x.toFixed(2)}" y1="${t1.y.toFixed(2)}" x2="${t2.x.toFixed(2)}" y2="${t2.y.toFixed(2)}" stroke="#333" stroke-width="1" />\n`;
       }
+    }
+
+    return svg;
+  }
+
+  _segmentedLine(from, to, color, segments) {
+    let svg = '';
+    const gap = 0.06; // fraction of segment length used as gap
+    for (let i = 0; i < segments; i++) {
+      const t0 = i / segments + gap / 2;
+      const t1 = (i + 1) / segments - gap / 2;
+      const x0 = from.x + (to.x - from.x) * t0;
+      const y0 = from.y + (to.y - from.y) * t0;
+      const x1 = from.x + (to.x - from.x) * t1;
+      const y1 = from.y + (to.y - from.y) * t1;
+      svg += `<line x1="${x0.toFixed(2)}" y1="${y0.toFixed(2)}" x2="${x1.toFixed(2)}" y2="${y1.toFixed(2)}" stroke="${color}" stroke-width="3" stroke-linecap="butt" />\n`;
     }
     return svg;
   }
