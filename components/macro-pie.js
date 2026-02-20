@@ -1,9 +1,10 @@
 // Macro Triangle — radar triangle showing macro calorie balance
 
-const CX = 220;
-const CY = 220;
-const VIEW = 440;
-const R = 132;            // radius of the triangle (center to vertex)
+const VIEW_W = 380;
+const VIEW_H = 320;
+const CX = 190;
+const CY = 165;
+const R = 120;            // radius of the triangle (center to vertex)
 const GRID_RINGS = 4;     // concentric reference triangles
 
 // Calorie multipliers
@@ -56,13 +57,13 @@ class MacroPie extends HTMLElement {
     if (totalCal === 0) {
       this.innerHTML = `
         <div class="macro-rings">
-          <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
+          <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
             ${this._renderGrid()}
             <text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central"
               fill="#555" font-family="var(--font)" font-size="18">
               no data
             </text>
-            <text x="${CX}" y="${VIEW - 8}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="19">daily macros</text>
+            <text x="${CX}" y="${VIEW_H - 10}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">daily macros</text>
           </svg>
         </div>
       `;
@@ -116,19 +117,19 @@ class MacroPie extends HTMLElement {
     // Axis labels with percentage and gram values
     const grams = { protein: p, carbs: c, fat: f };
     for (const m of MACROS) {
-      const lp = polar(m.angle, R + 24);
+      const lp = polar(m.angle, R + 20);
       const pctVal = Math.round(pcts[m.key] * 100);
-      const anchor = m.angle === -90 ? 'middle' : m.angle < 0 ? 'start' : m.angle > 90 ? 'end' : 'start';
+      const anchor = 'middle';
       const dy = m.angle === -90 ? -1 : 1; // top label: gram line above, bottom labels: gram line below
-      svg += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="16" font-weight="bold" text-anchor="${anchor}" dominant-baseline="central">${m.label}:${pctVal}%</text>\n`;
-      svg += `<text x="${lp.x.toFixed(2)}" y="${(lp.y + dy * 18).toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="13" text-anchor="${anchor}" dominant-baseline="central">${grams[m.key]}g</text>\n`;
+      svg += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="14" font-weight="bold" text-anchor="${anchor}" dominant-baseline="central">${m.label}:${pctVal}%</text>\n`;
+      svg += `<text x="${lp.x.toFixed(2)}" y="${(lp.y + dy * 16).toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="12" text-anchor="${anchor}" dominant-baseline="central">${grams[m.key]}g</text>\n`;
     }
 
     this.innerHTML = `
       <div class="macro-rings">
-        <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
+        <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
           ${svg}
-          <text x="${CX}" y="${VIEW - 8}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="19">daily macros</text>
+          <text x="${CX}" y="${VIEW_H - 10}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">daily macros</text>
         </svg>
       </div>
     `;
