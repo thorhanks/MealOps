@@ -90,12 +90,11 @@ class EatCard extends HTMLElement {
       if (submitting) return;
       const servings = parseInt(numInput.value, 10);
       if (!servings || servings < 1) return;
-      submitting = true;
-
       if (servings > this._inventory) {
         this._showError(actions, `only ${this._inventory} servings available`);
         return;
       }
+      submitting = true;
 
       try {
         await addLogEntry({
