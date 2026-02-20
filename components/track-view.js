@@ -153,6 +153,14 @@ class TrackView extends HTMLElement {
       this._handleAdhocLogged(e.detail);
       hideAdhoc();
     });
+
+    // Click day in weekly trend to navigate
+    this.addEventListener('trend-day-selected', (e) => {
+      const sunday = getWeekSunday(this._selectedDate);
+      this._selectedDate = startOfDay(addDays(sunday, e.detail.dayIndex));
+      this._updateDateLabel();
+      this._loadDay().catch((err) => console.error('[Track] load failed', err));
+    });
   }
 
   _updateDateLabel() {

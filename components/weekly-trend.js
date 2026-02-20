@@ -115,6 +115,9 @@ class WeeklyTrend extends HTMLElement {
         const pctColor = isOver ? '#cc3300' : '#665500';
         svg += `<text x="${colX + COL_W / 2}" y="${MARGIN_TOP - 4}" text-anchor="middle" fill="${pctColor}" font-family="var(--font)" font-size="8">${pctText}</text>\n`;
       }
+
+      // Clickable hit area covering column + labels
+      svg += `<rect x="${colX - COL_GAP / 2}" y="0" width="${COL_W + COL_GAP}" height="${VIEW_H}" fill="transparent" data-day="${col}" style="cursor:pointer" />\n`;
     }
 
     this.innerHTML = `
@@ -125,6 +128,17 @@ class WeeklyTrend extends HTMLElement {
         </svg>
       </div>
     `;
+
+    // Click handlers for day columns
+    this.querySelectorAll('[data-day]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const dayIndex = parseInt(el.dataset.day, 10);
+        this.dispatchEvent(new CustomEvent('trend-day-selected', {
+          bubbles: true,
+          detail: { dayIndex },
+        }));
+      });
+    });
   }
 }
 
