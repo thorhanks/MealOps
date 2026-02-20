@@ -1,10 +1,9 @@
 // Macro Triangle — radar triangle showing macro calorie balance
 
-const CX = 250;
-const CY = 228;
-const VIEW_W = 500;
-const VIEW_H = 440;
-const R = 146;            // radius of the triangle (center to vertex)
+const CX = 200;
+const CY = 200;
+const VIEW = 400;
+const R = 120;            // radius of the triangle (center to vertex)
 const GRID_RINGS = 4;     // concentric reference triangles
 
 // Calorie multipliers
@@ -57,7 +56,7 @@ class MacroPie extends HTMLElement {
     if (totalCal === 0) {
       this.innerHTML = `
         <div class="macro-rings">
-          <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
+          <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
             ${this._renderGrid()}
             <text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central"
               fill="#555" font-family="var(--font)" font-size="18">
@@ -127,7 +126,7 @@ class MacroPie extends HTMLElement {
 
     this.innerHTML = `
       <div class="macro-rings">
-        <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
+        <svg class="macro-rings__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
           ${svg}
         </svg>
         <h3 class="prompt">daily macros</h3>
