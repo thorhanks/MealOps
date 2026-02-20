@@ -945,8 +945,12 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 /* Weekly Trend */
+/* Weekly Trend — vertical segmented equalizer */
 .weekly-trend {
-  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .weekly-trend__empty {
@@ -954,50 +958,9 @@ input[type="number"]::-webkit-outer-spin-button {
   padding: var(--spacing-sm) 0;
 }
 
-.weekly-trend__chart {
-  margin-top: var(--spacing-md);
-  font-family: var(--font);
-  font-size: var(--font-size-sm);
-  line-height: 1.1;
-  color: var(--text);
-}
-
-.weekly-trend__row {
-  white-space: nowrap;
-}
-
-.weekly-trend__row--over {
-  color: var(--error);
-}
-
-.weekly-trend__row--over .weekly-trend__fill {
-  color: var(--error);
-}
-
-.weekly-trend__row--selected {
-  background: rgba(255, 176, 0, 0.1);
-}
-
-.weekly-trend__day {
-  display: inline-block;
-  width: 4ch;
-}
-
-.weekly-trend__fill {
-  color: var(--text);
-}
-
-.weekly-trend__empty-bar {
-  color: var(--text-muted);
-  opacity: 0.3;
-}
-
-.weekly-trend__cal {
-  color: var(--text-muted);
-}
-
-.weekly-trend__pct {
-  color: var(--text-muted);
+.weekly-trend__svg {
+  width: 312px;
+  height: auto;
 }
 
 /* ── Command Palette ── */
