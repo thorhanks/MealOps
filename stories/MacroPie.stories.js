@@ -41,3 +41,7 @@ export const LargeValues = {
 export const SingleMacro = {
   render: () => createPie({ protein: 50, carbs: 0, fat: 0 }),
 };
+
+export const EqualSplit = {
+  render: () => createPie({ protein: 50, carbs: 50, fat: 25 }),
+};

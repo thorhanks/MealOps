@@ -788,39 +788,27 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 200px;
 }
 
-/* Macro Pie Chart */
-.macro-pie {
+/* Macro Rings — concentric reactor core */
+.macro-rings {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.macro-rings__svg {
+  width: 200px;
+  height: 200px;
+}
+
+.macro-rings__legend {
+  display: flex;
   gap: var(--spacing-lg);
-}
-
-.macro-pie > .prompt {
-  width: 100%;
-}
-
-.macro-pie__svg {
-  display: block;
-  flex-shrink: 0;
-}
-
-.macro-pie__legend {
-  color: var(--text-muted);
   font-size: var(--font-size-sm);
 }
 
-.macro-pie__legend-row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  line-height: 2;
-}
-
-.macro-pie__legend-swatch {
-  display: inline-block;
-  width: 1.2ch;
-  height: 1.2ch;
+.macro-rings__legend-item {
+  white-space: nowrap;
 }
 
 /* Consumption Log */
