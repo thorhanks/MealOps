@@ -98,7 +98,7 @@ class WeeklyTrend extends HTMLElement {
     for (let i = 0; i < 7; i++) {
       const angle = START_ANGLE + i * SPOKE_ANGLE;
       const p1 = polar(angle, R_INNER - 2);
-      const p2 = polar(angle, R_OUTER + 2);
+      const p2 = polar(angle, R_OUTER + 25);
       svg += `<line x1="${p1.x.toFixed(2)}" y1="${p1.y.toFixed(2)}" x2="${p2.x.toFixed(2)}" y2="${p2.y.toFixed(2)}" stroke="#222" stroke-width="1" />\n`;
     }
 
@@ -133,7 +133,7 @@ class WeeklyTrend extends HTMLElement {
 
       // Day label + percentage — stacked at wedge midpoint, beyond outer radius
       const midAngle = START_ANGLE + (i + 0.5) * SPOKE_ANGLE;
-      const labelR = R_OUTER + 16;
+      const labelR = R_OUTER + 20;
       const lp = polar(midAngle, labelR);
       const dayColor = isSelected ? '#ffb000' : '#665500';
       const fontWeight = isSelected ? 'bold' : 'normal';
