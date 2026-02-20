@@ -4,15 +4,15 @@ const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const SEGMENTS = 12;
 const SEG_H = 8;
 const SEG_GAP = 2;
-const COL_W = 16;
-const COL_GAP = 8;
+const COL_W = 24;
+const COL_GAP = 12;
 const COL_H = SEGMENTS * (SEG_H + SEG_GAP) - SEG_GAP; // total column pixel height
 
 // Layout
-const MARGIN_LEFT = 28;
-const MARGIN_TOP = 14;
-const LABEL_Y = MARGIN_TOP + COL_H + 14;
-const CAL_Y = LABEL_Y + 12;
+const MARGIN_LEFT = 32;
+const MARGIN_TOP = 18;
+const LABEL_Y = MARGIN_TOP + COL_H + 16;
+const CAL_Y = LABEL_Y + 14;
 const VIEW_W = MARGIN_LEFT + 7 * (COL_W + COL_GAP) - COL_GAP + 10;
 const VIEW_H = CAL_Y + 8;
 
@@ -70,7 +70,7 @@ class WeeklyTrend extends HTMLElement {
 
     // Target reference line — dashed horizontal at 100%
     svg += `<line x1="${MARGIN_LEFT - 4}" y1="${TARGET_Y}" x2="${MARGIN_LEFT + 7 * (COL_W + COL_GAP) - COL_GAP + 4}" y2="${TARGET_Y}" stroke="#333" stroke-width="1" stroke-dasharray="3 3" />\n`;
-    svg += `<text x="${MARGIN_LEFT - 6}" y="${TARGET_Y + 3}" text-anchor="end" fill="#555" font-family="var(--font)" font-size="7">100%</text>\n`;
+    svg += `<text x="${MARGIN_LEFT - 6}" y="${TARGET_Y + 4}" text-anchor="end" fill="#555" font-family="var(--font)" font-size="9">100%</text>\n`;
 
     // Columns
     for (let col = 0; col < data.length && col < 7; col++) {
@@ -102,18 +102,18 @@ class WeeklyTrend extends HTMLElement {
       // Day label
       const dayLabel = DAY_LABELS[col] || '?';
       const dayColor = isSelected ? '#ffb000' : '#665500';
-      svg += `<text x="${colX + COL_W / 2}" y="${LABEL_Y}" text-anchor="middle" fill="${dayColor}" font-family="var(--font)" font-size="8" font-weight="${isSelected ? 'bold' : 'normal'}">${dayLabel}</text>\n`;
+      svg += `<text x="${colX + COL_W / 2}" y="${LABEL_Y}" text-anchor="middle" fill="${dayColor}" font-family="var(--font)" font-size="10" font-weight="${isSelected ? 'bold' : 'normal'}">${dayLabel}</text>\n`;
 
       // Calorie value
       const cal = Math.round(d.calories);
       const calColor = isOver ? '#cc3300' : '#555';
-      svg += `<text x="${colX + COL_W / 2}" y="${CAL_Y}" text-anchor="middle" fill="${calColor}" font-family="var(--font)" font-size="7">${cal > 0 ? cal : '-'}</text>\n`;
+      svg += `<text x="${colX + COL_W / 2}" y="${CAL_Y}" text-anchor="middle" fill="${calColor}" font-family="var(--font)" font-size="9">${cal > 0 ? cal : '-'}</text>\n`;
 
       // Percentage above column
       if (cal > 0) {
         const pctText = Math.round(pct * 100) + '%';
         const pctColor = isOver ? '#cc3300' : '#665500';
-        svg += `<text x="${colX + COL_W / 2}" y="${MARGIN_TOP - 4}" text-anchor="middle" fill="${pctColor}" font-family="var(--font)" font-size="6">${pctText}</text>\n`;
+        svg += `<text x="${colX + COL_W / 2}" y="${MARGIN_TOP - 4}" text-anchor="middle" fill="${pctColor}" font-family="var(--font)" font-size="8">${pctText}</text>\n`;
       }
     }
 
