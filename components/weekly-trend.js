@@ -113,6 +113,11 @@ class WeeklyTrend extends HTMLElement {
       const isOver = pct > 1;
       const isSelected = d.isSelected;
 
+      // Wedge background — subtle alternating tint
+      const bgColor = i % 2 === 0 ? '#2a1f00' : '#1a1400';
+      const bgPath = arcSectorPath(wedgeStart, wedgeEnd, R_INNER, R_OUTER);
+      svg += `<path d="${bgPath}" fill="${bgColor}" opacity="0.6" />\n`;
+
       // Arc segments — concentric rings within the wedge
       for (let seg = 0; seg < SEGMENTS; seg++) {
         const rIn = R_INNER + seg * RING_H + RING_GAP;
