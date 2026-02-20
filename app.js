@@ -204,7 +204,20 @@ function escHtml(text) {
 window.addEventListener('palette-search', async (e) => {
   const { query, matches } = e.detail;
   const view = views.cook;
-  const grid = view.querySelector('#recipe-grid');
+
+  // Wait for cook grid to render (may still be loading from DB)
+  let grid = view.querySelector('#recipe-grid');
+  if (!grid) {
+    await new Promise((resolve) => {
+      let attempts = 0;
+      const check = () => {
+        grid = view.querySelector('#recipe-grid');
+        if (grid || ++attempts > 20) resolve();
+        else setTimeout(check, 50);
+      };
+      check();
+    });
+  }
   if (!grid) return;
 
   grid.innerHTML = '';

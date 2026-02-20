@@ -52,7 +52,7 @@ class BodyGauge extends HTMLElement {
     const pct = Math.round((current / target) * 100);
     const fillRatio = Math.min(1, current / target);
     const litCount = Math.round(fillRatio * SEGMENTS);
-    const isOver = pct >= 100;
+    const isOver = pct > 100;
 
     // Background track — full arc, very dim
     const trackPath = arcPath(ARC_START, ARC_START + ARC_SWEEP);
