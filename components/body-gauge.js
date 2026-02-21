@@ -54,32 +54,34 @@ class BodyGauge extends HTMLElement {
     const litCount = Math.round(fillRatio * SEGMENTS);
     const isOver = pct > 100;
 
-    // Background track — full arc, very dim
+    // In-place update path: update existing segments and text
+    if (!this._animate && this.querySelector('.bg-seg')) {
+      this._update(current, target, label, pct, litCount, isOver);
+      return;
+    }
+
+    // Full rebuild path (first render / animated)
     const trackPath = arcPath(ARC_START, ARC_START + ARC_SWEEP);
     const track = `<path d="${trackPath}" fill="none" stroke="#1a1a1a" stroke-width="${STROKE_W + 2}" stroke-linecap="butt" />`;
 
-    // Inner reference ring — dashed
     const innerR = R - STROKE_W / 2 - 6;
     const innerRing = `<path d="${arcPath(ARC_START, ARC_START + ARC_SWEEP, innerR)}" fill="none" stroke="#222" stroke-width="1" stroke-dasharray="3 3" />`;
 
-    // Segments
     const segs = [];
     for (let i = 0; i < SEGMENTS; i++) {
       const a0 = ARC_START + i * (SEG_DEG + GAP_DEG);
       const a1 = a0 + SEG_DEG;
       const lit = i < litCount;
       const color = segColor(i, SEGMENTS, isOver && lit);
-
       const op = lit ? 1 : 0.12;
-      const anim = this._animate
+      const style = this._animate
         ? `--seg-opacity:${op}; animation: seg-in 200ms ${i * 30}ms ease-out both`
-        : `opacity:${op}`;
+        : `opacity:${op}; transition: opacity .3s, stroke .3s`;
       segs.push(
-        `<path d="${arcPath(a0, a1)}" fill="none" stroke="${color}" stroke-width="${STROKE_W}" stroke-linecap="butt" style="${anim}" />`
+        `<path class="bg-seg" data-i="${i}" d="${arcPath(a0, a1)}" fill="none" stroke="${color}" stroke-width="${STROKE_W}" stroke-linecap="butt" style="${style}" />`
       );
     }
 
-    // Tick marks at 0%, 25%, 50%, 75%, 100%
     const ticks = [];
     const tickDefs = [
       { pct: 0,   lbl: '0' },
@@ -109,18 +111,16 @@ class BodyGauge extends HTMLElement {
       }
     }
 
-    // Redline marker at 100%
     const redAngle = ARC_START + ARC_SWEEP;
     const rl1 = polar(redAngle, R - STROKE_W / 2 - 4);
     const rl2 = polar(redAngle, R + STROKE_W / 2 + 4);
-    const redline = `<line x1="${rl1.x.toFixed(2)}" y1="${rl1.y.toFixed(2)}" x2="${rl2.x.toFixed(2)}" y2="${rl2.y.toFixed(2)}" stroke="${isOver ? '#cc3300' : '#aa7700'}" stroke-width="2" />`;
+    const redline = `<line class="bg-redline" x1="${rl1.x.toFixed(2)}" y1="${rl1.y.toFixed(2)}" x2="${rl2.x.toFixed(2)}" y2="${rl2.y.toFixed(2)}" stroke="${isOver ? '#cc3300' : '#aa7700'}" stroke-width="2" />`;
 
-    // Center readout
     const numColor = isOver ? '#cc3300' : '#ffb000';
     const centerText = `
-      <text x="${CX}" y="${CY - 14}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="34" font-weight="bold">${Math.round(current)}</text>
-      <text x="${CX}" y="${CY + 11}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">/ ${Math.round(target)} ${label}</text>
-      <text x="${CX}" y="${CY + 34}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="18">${pct}%</text>
+      <text class="bg-current" x="${CX}" y="${CY - 14}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="34" font-weight="bold">${Math.round(current)}</text>
+      <text class="bg-target" x="${CX}" y="${CY + 11}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">/ ${Math.round(target)} ${label}</text>
+      <text class="bg-pct" x="${CX}" y="${CY + 34}" text-anchor="middle" fill="${numColor}" font-family="var(--font)" font-size="18">${pct}%</text>
       <text x="${CX}" y="${VIEW - 6}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="12">daily calories</text>
     `;
 
@@ -137,6 +137,39 @@ class BodyGauge extends HTMLElement {
       </div>
     `;
     this._animate = false;
+  }
+
+  _update(current, target, label, pct, litCount, isOver) {
+    // Update segments in-place (CSS transitions handle the animation)
+    const segEls = this.querySelectorAll('.bg-seg');
+    for (const el of segEls) {
+      const i = parseInt(el.dataset.i, 10);
+      const lit = i < litCount;
+      const color = segColor(i, SEGMENTS, isOver && lit);
+      const op = lit ? 1 : 0.12;
+      el.setAttribute('stroke', color);
+      el.style.cssText = `opacity:${op}; transition: opacity .3s, stroke .3s`;
+    }
+
+    // Update center text
+    const numColor = isOver ? '#cc3300' : '#ffb000';
+    const currentEl = this.querySelector('.bg-current');
+    const targetEl = this.querySelector('.bg-target');
+    const pctEl = this.querySelector('.bg-pct');
+    const redline = this.querySelector('.bg-redline');
+
+    if (currentEl) { currentEl.textContent = Math.round(current); currentEl.setAttribute('fill', numColor); }
+    if (targetEl) targetEl.textContent = `/ ${Math.round(target)} ${label}`;
+    if (pctEl) { pctEl.textContent = `${pct}%`; pctEl.setAttribute('fill', numColor); }
+    if (redline) redline.setAttribute('stroke', isOver ? '#cc3300' : '#aa7700');
+
+    // Update over state
+    const wrapper = this.querySelector('.body-gauge');
+    if (wrapper) wrapper.classList.toggle('body-gauge--over', isOver);
+
+    // Update aria label
+    const svg = this.querySelector('.body-gauge__svg');
+    if (svg) svg.setAttribute('aria-label', `Daily calories: ${Math.round(current)} of ${Math.round(target)} ${label}`);
   }
 }
 
