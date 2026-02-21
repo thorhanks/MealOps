@@ -1,5 +1,4 @@
 import { addLogEntry } from '../utils/db.js';
-import './num-input.js';
 import { escHtml, typewrite } from '../utils/html.js';
 
 class EatCard extends HTMLElement {
@@ -78,56 +77,35 @@ class EatCard extends HTMLElement {
   _handleEat() {
     const actions = this.querySelector('.inventory-card__actions');
     actions.innerHTML = `
-      <span class="prompt">servings to eat:</span>
-      <num-input min="1" max="${this._inventory}" value="1" width="6ch"></num-input>
-      <button class="btn" data-action="confirm-eat">[ok]</button>
-      <button class="btn" data-action="cancel">[cancel]</button>
+      <span class="prompt">eat 1 serving?</span>
+      <button class="btn" data-action="confirm-eat">[y]</button>
+      <button class="btn" data-action="cancel">[n]</button>
     `;
-
-    const numInput = actions.querySelector('num-input');
-    numInput.focus();
-    numInput.select();
 
     const confirm = actions.querySelector('[data-action="confirm-eat"]');
     const cancel = actions.querySelector('[data-action="cancel"]');
 
-    let submitting = false;
-    const submit = async () => {
-      if (submitting) return;
-      const servings = parseInt(numInput.value, 10);
-      if (!servings || servings < 1) return;
-      if (servings > this._inventory) {
-        this._showError(actions, `only ${this._inventory} servings available`);
-        return;
-      }
-      submitting = true;
-
+    confirm.addEventListener('click', async () => {
       try {
         await addLogEntry({
           recipeId: this._recipe.id,
           type: 'consumption',
-          servings: servings,
+          servings: 1,
           date: Date.now(),
         });
 
-        this._inventory -= servings;
+        this._inventory -= 1;
         this.render();
         this.dispatchEvent(new CustomEvent('consumption-logged', {
           bubbles: true,
-          detail: { recipeId: this._recipe.id, servings, inventory: this._inventory },
+          detail: { recipeId: this._recipe.id, servings: 1, inventory: this._inventory },
         }));
       } catch (err) {
-        submitting = false;
         console.error('[Eat] failed to log consumption', err);
         this._showError(actions, `failed to log — ${err.message}`);
       }
-    };
-
-    confirm.addEventListener('click', submit);
-    numInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submit();
-      if (e.key === 'Escape') this.render();
     });
+
     cancel.addEventListener('click', () => this.render());
   }
 
