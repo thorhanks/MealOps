@@ -1,5 +1,6 @@
 import { addLogEntry } from '../utils/db.js';
 import './num-input.js';
+import { escHtml } from '../utils/html.js';
 
 class EatCard extends HTMLElement {
   constructor() {
@@ -49,7 +50,7 @@ class EatCard extends HTMLElement {
     this.innerHTML = `
       <div class="inventory-card" ${stock ? `data-stock="${stock}"` : ''}>
         <div class="inventory-card__header">
-          <span class="inventory-card__name">${this._esc(r.name)}</span>
+          <span class="inventory-card__name">${escHtml(r.name)}</span>
           <span class="inventory-card__stock">${this._inventory} servings</span>
         </div>
         <div class="inventory-card__macros">
@@ -59,14 +60,19 @@ class EatCard extends HTMLElement {
           <span>cal:${Math.round(m.calories)}</span>
         </div>
         <div class="inventory-card__actions">
-          <button class="btn btn-primary" data-action="eat">[eat]</button>
+          ${this._inventory > 0
+            ? '<button class="btn btn-primary" data-action="eat">[eat]</button>'
+            : '<span class="msg-dim">depleted</span>'}
         </div>
       </div>
     `;
 
-    this.querySelector('[data-action="eat"]').addEventListener('click', () => {
-      this._handleEat();
-    });
+    const eatBtn = this.querySelector('[data-action="eat"]');
+    if (eatBtn) {
+      eatBtn.addEventListener('click', () => {
+        this._handleEat();
+      });
+    }
   }
 
   _handleEat() {
@@ -135,11 +141,6 @@ class EatCard extends HTMLElement {
     errorEl.textContent = message;
   }
 
-  _esc(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
 }
 
 customElements.define('eat-card', EatCard);

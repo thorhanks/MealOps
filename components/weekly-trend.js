@@ -154,7 +154,7 @@ class WeeklyTrend extends HTMLElement {
 
       // Clickable hit area — invisible wedge
       const hitPath = arcSectorPath(wedgeStart - ARC_GAP, wedgeEnd + ARC_GAP, R_INNER - 8, R_OUTER + 39);
-      svg += `<path d="${hitPath}" fill="transparent" data-day="${i}" style="cursor:pointer" />\n`;
+      svg += `<path d="${hitPath}" fill="transparent" data-day="${i}" role="button" tabindex="0" aria-label="${DAY_LABELS[i]}: ${Math.round(d.calories)} calories" style="cursor:pointer" />\n`;
     }
 
     // Center label
@@ -162,20 +162,27 @@ class WeeklyTrend extends HTMLElement {
 
     this.innerHTML = `
       <div class="weekly-trend">
-        <svg class="weekly-trend__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg">
+        <svg class="weekly-trend__svg" viewBox="0 0 ${VIEW} ${VIEW}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Weekly calorie trend">
           ${svg}
         </svg>
       </div>
     `;
 
-    // Click handlers for day wedges
+    // Click + keyboard handlers for day wedges
     this.querySelectorAll('[data-day]').forEach((el) => {
-      el.addEventListener('click', () => {
+      const handler = () => {
         const dayIndex = parseInt(el.dataset.day, 10);
         this.dispatchEvent(new CustomEvent('trend-day-selected', {
           bubbles: true,
           detail: { dayIndex },
         }));
+      };
+      el.addEventListener('click', handler);
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handler();
+        }
       });
     });
   }

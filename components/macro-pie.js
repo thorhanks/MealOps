@@ -57,7 +57,7 @@ class MacroPie extends HTMLElement {
     if (totalCal === 0) {
       this.innerHTML = `
         <div class="macro-rings">
-          <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
+          <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Daily macros: no data">
             ${this._renderGrid()}
             <text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central"
               fill="#555" font-family="var(--font)" font-size="18">
@@ -127,7 +127,7 @@ class MacroPie extends HTMLElement {
 
     this.innerHTML = `
       <div class="macro-rings">
-        <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg">
+        <svg class="macro-rings__svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Daily macros: protein ${p}g (${Math.round(pcts.protein * 100)}%), carbs ${c}g (${Math.round(pcts.carbs * 100)}%), fat ${f}g (${Math.round(pcts.fat * 100)}%)">
           ${svg}
           <text x="${CX}" y="${VIEW_H - 10}" text-anchor="middle" fill="#665500" font-family="var(--font)" font-size="14">daily macros</text>
         </svg>

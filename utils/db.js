@@ -52,6 +52,9 @@ function migrate(db, oldVersion, newVersion) {
     // settings
     db.createObjectStore('settings', { keyPath: 'id' });
   }
+
+  // Future migrations:
+  // if (oldVersion < 2) { /* v2 migration steps */ }
 }
 
 // ── Generic CRUD ──
@@ -199,14 +202,26 @@ function getInventory(recipeId) {
 }
 
 async function getAllInventory() {
-  const recipes = await getAllRecipes();
-  const pairs = await Promise.all(
-    recipes.map(async (recipe) => ({
+  const [recipes, allLogs] = await Promise.all([
+    getAllRecipes(),
+    getAll('servingsLog'),
+  ]);
+
+  // Compute inventory for all recipes in a single pass
+  const inventoryMap = {};
+  for (const entry of allLogs) {
+    if (!entry.recipeId) continue;
+    if (!inventoryMap[entry.recipeId]) inventoryMap[entry.recipeId] = 0;
+    if (entry.type === 'production') inventoryMap[entry.recipeId] += entry.servings;
+    else if (entry.type === 'consumption') inventoryMap[entry.recipeId] -= entry.servings;
+  }
+
+  return recipes
+    .map((recipe) => ({
       recipe,
-      inventory: await getInventory(recipe.id),
+      inventory: Math.max(0, inventoryMap[recipe.id] || 0),
     }))
-  );
-  return pairs.filter((p) => p.inventory > 0);
+    .filter((p) => p.inventory > 0);
 }
 
 // ── Ingredient Cache ──
@@ -237,6 +252,26 @@ function saveSettings(settings) {
   settings.updated = Date.now();
   if (!settings.created) settings.created = Date.now();
   return put('settings', settings);
+}
+
+function updateSettings(fn) {
+  return open().then((db) => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction('settings', 'readwrite');
+      const store = transaction.objectStore('settings');
+      const request = store.get(SETTINGS_ID);
+
+      request.onsuccess = () => {
+        const settings = request.result || { id: SETTINGS_ID, targetCalories: 2000, created: Date.now() };
+        fn(settings);
+        settings.updated = Date.now();
+        store.put(settings);
+      };
+
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+  });
 }
 
 // ── Bulk Operations (import/export) ──
@@ -291,6 +326,7 @@ export {
   cacheIngredient,
   getSettings,
   saveSettings,
+  updateSettings,
   getAllRecipesRaw,
   getAllLogEntries,
   getAllCachedIngredients,

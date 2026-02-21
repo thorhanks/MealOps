@@ -1,6 +1,7 @@
 import { searchFoodsDebounced, scaleNutrients, getApiKey, saveApiKey } from '../utils/api.js';
 import { UNIT_OPTIONS, toGrams } from '../utils/units.js';
 import './num-input.js';
+import { escHtml } from '../utils/html.js';
 
 class AdhocFood extends HTMLElement {
   constructor() {
@@ -125,7 +126,7 @@ class AdhocFood extends HTMLElement {
         const item = document.createElement('button');
         item.className = 'btn usda-results__item';
         const n = food.nutrients;
-        item.innerHTML = `${this._esc(food.description)} <span class="usda-results__macros">[p:${Math.round(n.protein)}g c:${Math.round(n.carbs)}g f:${Math.round(n.fat)}g cal:${Math.round(n.calories)}/100g]</span>`;
+        item.innerHTML = `${escHtml(food.description)} <span class="usda-results__macros">[p:${Math.round(n.protein)}g c:${Math.round(n.carbs)}g f:${Math.round(n.fat)}g cal:${Math.round(n.calories)}/100g]</span>`;
         item.addEventListener('click', () => this._selectResult(food));
         list.appendChild(item);
       });
@@ -134,7 +135,7 @@ class AdhocFood extends HTMLElement {
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.error('[AdhocFood] search error', err);
-      resultsEl.innerHTML = `<span class="msg-error">${this._esc(err.message)}</span>`;
+      resultsEl.innerHTML = `<span class="msg-error">${escHtml(err.message)}</span>`;
     }
   }
 
@@ -222,11 +223,6 @@ class AdhocFood extends HTMLElement {
     statusEl.innerHTML = '';
   }
 
-  _esc(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-  }
 }
 
 customElements.define('adhoc-food', AdhocFood);

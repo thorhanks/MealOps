@@ -1,6 +1,7 @@
 import { navigate } from '../utils/router.js';
 import { exportData, importFromFile } from '../utils/data-io.js';
 import { getAllRecipes } from '../utils/db.js';
+import { escHtml } from '../utils/html.js';
 
 const COMMANDS = [
   { id: 'cook', label: 'cook', hint: 'go to recipes', action: () => navigate('/cook') },
@@ -51,14 +52,15 @@ class CommandPalette extends HTMLElement {
 
   render() {
     this.innerHTML = `
-      <div class="command-palette ${this._open ? 'open' : ''}">
+      <div class="command-palette ${this._open ? 'open' : ''}" role="dialog" aria-modal="true" aria-label="Command palette">
         <div class="command-palette__container">
           <input class="command-palette__input" type="text"
-            placeholder="> type a command..." value="${this._esc(this._query)}">
-          <div class="command-palette__list">
+            placeholder="> type a command..." value="${escHtml(this._query)}"
+            role="combobox" aria-expanded="true" aria-controls="palette-list" aria-activedescendant="${this._selectedIndex >= 0 ? `palette-item-${this._selectedIndex}` : ''}">
+          <div class="command-palette__list" id="palette-list" role="listbox">
             ${this._renderItems()}
           </div>
-          ${this._statusMsg ? `<div class="command-palette__status">${this._esc(this._statusMsg)}</div>` : ''}
+          ${this._statusMsg ? `<div class="command-palette__status">${escHtml(this._statusMsg)}</div>` : ''}
         </div>
       </div>
     `;
@@ -69,17 +71,17 @@ class CommandPalette extends HTMLElement {
     if (this._filtered.length === 0) {
       const q = this._query.trim();
       if (q.toLowerCase().startsWith('search ') && q.length > 7) {
-        return `<div class="command-palette__item selected" data-action="search">
-          <span class="command-palette__item-label">search recipes: "${this._esc(q.slice(7))}"</span>
+        return `<div class="command-palette__item selected" data-action="search" role="option" id="palette-item-0" aria-selected="true">
+          <span class="command-palette__item-label">search recipes: "${escHtml(q.slice(7))}"</span>
         </div>`;
       }
       return '<div class="command-palette__empty">no matching commands</div>';
     }
 
     return this._filtered.map((cmd, i) => `
-      <div class="command-palette__item ${i === this._selectedIndex ? 'selected' : ''}" data-index="${i}">
-        <span class="command-palette__item-label">${this._esc(cmd.label)}</span>
-        <span class="command-palette__item-hint">${this._esc(cmd.hint)}</span>
+      <div class="command-palette__item ${i === this._selectedIndex ? 'selected' : ''}" data-index="${i}" role="option" id="palette-item-${i}" aria-selected="${i === this._selectedIndex}">
+        <span class="command-palette__item-label">${escHtml(cmd.label)}</span>
+        <span class="command-palette__item-hint">${escHtml(cmd.hint)}</span>
       </div>
     `).join('');
   }
@@ -258,12 +260,6 @@ class CommandPalette extends HTMLElement {
         container.appendChild(div);
       }
     }
-  }
-
-  _esc(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
   }
 }
 

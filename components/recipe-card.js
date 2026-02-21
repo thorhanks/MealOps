@@ -1,5 +1,6 @@
 import { getInventory, addLogEntry, deleteRecipe } from '../utils/db.js';
 import { navigate } from '../utils/router.js';
+import { escHtml } from '../utils/html.js';
 import './num-input.js';
 
 class RecipeCard extends HTMLElement {
@@ -11,11 +12,17 @@ class RecipeCard extends HTMLElement {
 
   set recipe(value) {
     this._recipe = value;
-    this._loadInventory();
+    if (!this._inventoryPreset) this._loadInventory();
+    else this.render();
   }
 
   get recipe() {
     return this._recipe;
+  }
+
+  set inventory(value) {
+    this._inventory = value;
+    this._inventoryPreset = true;
   }
 
   async _loadInventory() {
@@ -26,7 +33,8 @@ class RecipeCard extends HTMLElement {
   }
 
   connectedCallback() {
-    if (this._recipe) this._loadInventory();
+    if (this._recipe && !this._inventoryPreset) this._loadInventory();
+    else if (this._recipe) this.render();
   }
 
   render() {
@@ -41,7 +49,7 @@ class RecipeCard extends HTMLElement {
     this.innerHTML = `
       <div class="recipe-card">
         <div class="recipe-card__header">
-          <span class="recipe-card__name">${this._esc(r.name)}</span>
+          <span class="recipe-card__name">${escHtml(r.name)}</span>
           <span class="recipe-card__inventory">${this._inventory} in stock</span>
         </div>
         <div class="recipe-card__macros">
@@ -107,6 +115,13 @@ class RecipeCard extends HTMLElement {
 
       this._inventory += servings;
       this.render();
+      const msg = this.querySelector('.recipe-card__actions');
+      if (msg) {
+        const feedback = document.createElement('span');
+        feedback.className = 'msg-ok';
+        feedback.textContent = `OK: ${servings} serving${servings !== 1 ? 's' : ''} added`;
+        msg.prepend(feedback);
+      }
       this.dispatchEvent(new CustomEvent('inventory-changed', { bubbles: true }));
     };
 
@@ -135,11 +150,6 @@ class RecipeCard extends HTMLElement {
     this.querySelector('[data-action="cancel"]').addEventListener('click', () => this.render());
   }
 
-  _esc(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
 }
 
 customElements.define('recipe-card', RecipeCard);

@@ -1,5 +1,5 @@
 import { addRoute, start, navigate } from './utils/router.js';
-import { open, getAllRecipes } from './utils/db.js';
+import { open, getAllRecipes, getAllInventory } from './utils/db.js';
 import './components/recipe-card.js';
 import './components/recipe-form.js';
 import './components/recipe-view.js';
@@ -8,6 +8,7 @@ import './components/track-view.js';
 import './components/command-palette.js';
 import './components/help-view.js';
 import './components/welcome-view.js';
+import { escHtml } from './utils/html.js';
 
 // ── View Management ──
 
@@ -29,6 +30,17 @@ function showView(name) {
     const route = link.dataset.route;
     link.classList.toggle('active', route === '/' + name);
   });
+  // Move focus to the new view for screen readers
+  const activeView = views[name];
+  if (activeView) {
+    requestAnimationFrame(() => {
+      const heading = activeView.querySelector('h2, h3, [tabindex]');
+      if (heading) {
+        if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+        heading.focus({ preventScroll: true });
+      }
+    });
+  }
 }
 
 function setStatus(text) {
@@ -39,9 +51,12 @@ function setStatus(text) {
 
 async function renderCookGrid() {
   const view = views.cook;
-  let recipes;
+  let recipes, inventoryMap;
   try {
-    recipes = await getAllRecipes();
+    const [allRecipes, allInv] = await Promise.all([getAllRecipes(), getAllInventory()]);
+    recipes = allRecipes;
+    inventoryMap = {};
+    for (const { recipe, inventory } of allInv) inventoryMap[recipe.id] = inventory;
   } catch (err) {
     console.error('[Cook] failed to load recipes', err);
     view.innerHTML = `<span class="msg-error">failed to load recipes — ${err.message}</span>`;
@@ -67,6 +82,7 @@ async function renderCookGrid() {
     const grid = view.querySelector('#recipe-grid');
     for (const recipe of recipes) {
       const card = document.createElement('recipe-card');
+      card.inventory = inventoryMap[recipe.id] || 0;
       card.recipe = recipe;
       grid.appendChild(card);
     }
@@ -194,12 +210,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ── Palette Search: filter cook grid ──
-
-function escHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
 
 window.addEventListener('palette-search', async (e) => {
   const { query, matches } = e.detail;
