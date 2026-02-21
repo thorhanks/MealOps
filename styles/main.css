@@ -222,6 +222,12 @@ main {
   border-color: var(--border);
 }
 
+.btn:active {
+  background: var(--text);
+  color: var(--bg);
+  transition: none;
+}
+
 .btn-primary {
   color: var(--text);
   border-color: var(--border);
