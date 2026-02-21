@@ -45,12 +45,13 @@ class EatView extends HTMLElement {
       return;
     }
 
-    for (const { recipe, inventory } of items) {
+    items.forEach(({ recipe, inventory }, i) => {
       const card = document.createElement('eat-card');
       card.recipe = recipe;
       card.inventory = inventory;
+      card.style.animationDelay = `${i * 50}ms`;
       grid.appendChild(card);
-    }
+    });
   }
 }
 

@@ -8,6 +8,7 @@ class BarGauge extends HTMLElement {
   }
 
   connectedCallback() {
+    this._animate = true;
     this.render();
   }
 
@@ -34,10 +35,11 @@ class BarGauge extends HTMLElement {
 
     this.innerHTML = `
       <div class="bar-gauge ${colorClass}">
-        <span class="bar-gauge__bar">[<span class="bar-gauge__fill">${fillChars}</span><span class="bar-gauge__empty">${emptyChars}</span>]</span>
+        <span class="bar-gauge__bar">[<span class="bar-gauge__fill${this._animate ? ' bar-gauge__fill--animate' : ''}">${fillChars}</span><span class="bar-gauge__empty">${emptyChars}</span>]</span>
         <span class="bar-gauge__text">${Math.round(current)} / ${Math.round(target)} ${label} (${pct}%)</span>
       </div>
     `;
+    this._animate = false;
   }
 }
 

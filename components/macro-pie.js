@@ -6,6 +6,7 @@ const CX = 190;
 const CY = 165;
 const R = 120;            // radius of the triangle (center to vertex)
 const GRID_RINGS = 4;     // concentric reference triangles
+const LERP_DURATION = 300; // ms
 
 // Calorie multipliers
 const CAL_PER_G = { protein: 4, carbs: 4, fat: 9 };
@@ -27,23 +28,66 @@ function trianglePath(r) {
   return `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)} L ${pts[1].x.toFixed(2)} ${pts[1].y.toFixed(2)} L ${pts[2].x.toFixed(2)} ${pts[2].y.toFixed(2)} Z`;
 }
 
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
 class MacroPie extends HTMLElement {
   constructor() {
     super();
     this._data = null;
+    this._displayData = { protein: 0, carbs: 0, fat: 0 };
+    this._prevData = { protein: 0, carbs: 0, fat: 0 };
+    this._lerpId = null;
   }
 
   set data(value) {
     this._data = value;
-    if (this.isConnected) this.render();
+    if (this.isConnected) this._animateTo(value);
   }
 
   connectedCallback() {
+    if (this._data) {
+      this._displayData = { ...this._data };
+      this._prevData = { ...this._data };
+    }
     this.render();
   }
 
+  _animateTo(target) {
+    if (this._lerpId) cancelAnimationFrame(this._lerpId);
+
+    const from = { ...this._displayData };
+    const to = { protein: target.protein || 0, carbs: target.carbs || 0, fat: target.fat || 0 };
+    const start = performance.now();
+
+    const tick = (now) => {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / LERP_DURATION);
+      // Ease-out quad
+      const ease = 1 - (1 - t) * (1 - t);
+
+      this._displayData = {
+        protein: lerp(from.protein, to.protein, ease),
+        carbs: lerp(from.carbs, to.carbs, ease),
+        fat: lerp(from.fat, to.fat, ease),
+      };
+
+      this.render();
+
+      if (t < 1) {
+        this._lerpId = requestAnimationFrame(tick);
+      } else {
+        this._lerpId = null;
+        this._prevData = { ...to };
+      }
+    };
+
+    this._lerpId = requestAnimationFrame(tick);
+  }
+
   render() {
-    const d = this._data || { protein: 0, carbs: 0, fat: 0 };
+    const d = this._displayData;
     const p = Math.round(d.protein);
     const c = Math.round(d.carbs);
     const f = Math.round(d.fat);
@@ -81,9 +125,7 @@ class MacroPie extends HTMLElement {
     // Grid: concentric reference triangles + spokes
     svg += this._renderGrid();
 
-    // Data polygon — each vertex extends along its axis proportional to its share
-    // Normalize: a perfectly balanced split (33/33/33) fills to ~33% of each axis
-    // Scale so that the dominant macro reaching 100% fills the full radius
+    // Data polygon
     const dataPoints = MACROS.map(m => {
       const ratio = pcts[m.key];
       return polar(m.angle, ratio * R);
@@ -94,7 +136,7 @@ class MacroPie extends HTMLElement {
     // Filled polygon
     svg += `<path d="${dataPath}" fill="#ffb000" fill-opacity="0.08" stroke="none" />\n`;
 
-    // Segmented edges — each edge colored by its destination vertex's macro color
+    // Segmented edges
     for (let i = 0; i < MACROS.length; i++) {
       const from = dataPoints[i];
       const to = dataPoints[(i + 1) % MACROS.length];
@@ -102,25 +144,25 @@ class MacroPie extends HTMLElement {
       svg += this._segmentedLine(from, to, edgeColor, 8);
     }
 
-    // Vertex dots on data polygon
+    // Vertex dots
     for (let i = 0; i < MACROS.length; i++) {
       const pt = dataPoints[i];
       svg += `<circle cx="${pt.x.toFixed(2)}" cy="${pt.y.toFixed(2)}" r="4" fill="${MACROS[i].color}" />\n`;
     }
 
-    // Lines from center to data points (spokes through data)
+    // Spokes through data
     for (let i = 0; i < MACROS.length; i++) {
       const pt = dataPoints[i];
       svg += `<line x1="${CX}" y1="${CY}" x2="${pt.x.toFixed(2)}" y2="${pt.y.toFixed(2)}" stroke="${MACROS[i].color}" stroke-width="1" opacity="0.3" />\n`;
     }
 
-    // Axis labels with percentage and gram values
+    // Axis labels
     const grams = { protein: p, carbs: c, fat: f };
     for (const m of MACROS) {
       const lp = polar(m.angle, R + 20);
       const pctVal = Math.round(pcts[m.key] * 100);
       const anchor = 'middle';
-      const dy = m.angle === -90 ? -1 : 1; // top label: gram line above, bottom labels: gram line below
+      const dy = m.angle === -90 ? -1 : 1;
       svg += `<text x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="14" font-weight="bold" text-anchor="${anchor}" dominant-baseline="central">${m.label}:${pctVal}%</text>\n`;
       svg += `<text x="${lp.x.toFixed(2)}" y="${(lp.y + dy * 16).toFixed(2)}" fill="${m.color}" font-family="var(--font)" font-size="12" text-anchor="${anchor}" dominant-baseline="central">${grams[m.key]}g</text>\n`;
     }
@@ -155,7 +197,6 @@ class MacroPie extends HTMLElement {
       for (let i = 1; i <= GRID_RINGS; i++) {
         const r = (i / GRID_RINGS) * R;
         const tp = polar(m.angle, r);
-        // Small perpendicular tick
         const perpAngle = m.angle + 90;
         const t1 = { x: tp.x + 4 * Math.cos(perpAngle * Math.PI / 180), y: tp.y + 4 * Math.sin(perpAngle * Math.PI / 180) };
         const t2 = { x: tp.x - 4 * Math.cos(perpAngle * Math.PI / 180), y: tp.y - 4 * Math.sin(perpAngle * Math.PI / 180) };
@@ -168,7 +209,7 @@ class MacroPie extends HTMLElement {
 
   _segmentedLine(from, to, color, segments) {
     let svg = '';
-    const gap = 0.06; // fraction of segment length used as gap
+    const gap = 0.06;
     for (let i = 0; i < segments; i++) {
       const t0 = i / segments + gap / 2;
       const t1 = (i + 1) / segments - gap / 2;

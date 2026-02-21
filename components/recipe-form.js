@@ -3,7 +3,7 @@ import { searchFoodsDebounced, scaleNutrients, getApiKey, saveApiKey } from '../
 import { UNIT_OPTIONS, toGrams, hasFixedConversion } from '../utils/units.js';
 import { navigate } from '../utils/router.js';
 import './num-input.js';
-import { escHtml } from '../utils/html.js';
+import { escHtml, typeMsg } from '../utils/html.js';
 
 class RecipeForm extends HTMLElement {
   constructor() {
@@ -243,12 +243,12 @@ class RecipeForm extends HTMLElement {
     }
 
     const resultsEl = row.querySelector('.ingredient-row__results');
-    resultsEl.innerHTML = '<span class="msg-loading">searching USDA...</span>';
+    typeMsg(resultsEl, 'searching USDA...', 'loading');
 
     try {
       const results = await searchFoodsDebounced(query, 5);
       if (results.length === 0) {
-        resultsEl.innerHTML = '<span class="msg-error">no results found</span>';
+        typeMsg(resultsEl, 'no results found', 'error');
         return;
       }
       resultsEl.innerHTML = '';
@@ -271,9 +271,9 @@ class RecipeForm extends HTMLElement {
       if (err.name === 'AbortError') return; // debounced, ignore
       console.error('[API]', err);
       if (err.message === 'Invalid USDA API key') {
-        resultsEl.innerHTML = '<span class="msg-error">invalid API key — check settings</span>';
+        typeMsg(resultsEl, 'invalid API key — check settings', 'error');
       } else {
-        resultsEl.innerHTML = `<span class="msg-error">${escHtml(err.message)}</span>`;
+        typeMsg(resultsEl, err.message, 'error');
       }
     }
   }
@@ -320,7 +320,7 @@ class RecipeForm extends HTMLElement {
       const key = input.value.trim();
       if (key) {
         await saveApiKey(key);
-        resultsEl.innerHTML = '<span class="msg-ok">API key saved</span>';
+        typeMsg(resultsEl, 'API key saved', 'ok');
         setTimeout(() => this._handleSearch(index, row), 500);
       }
     };
@@ -385,11 +385,11 @@ class RecipeForm extends HTMLElement {
 
     // Validation
     if (!name) {
-      statusEl.innerHTML = '<span class="msg-error">recipe name is required</span>';
+      typeMsg(statusEl, 'recipe name is required', 'error');
       return;
     }
     if (!servings || servings < 1) {
-      statusEl.innerHTML = '<span class="msg-error">servings must be at least 1</span>';
+      typeMsg(statusEl, 'servings must be at least 1', 'error');
       return;
     }
 
@@ -437,7 +437,7 @@ class RecipeForm extends HTMLElement {
       navigate('/cook');
     } catch (err) {
       console.error('[RecipeForm] save failed', err);
-      statusEl.innerHTML = `<span class="msg-error">failed to save — ${escHtml(err.message)}</span>`;
+      typeMsg(statusEl, `failed to save — ${err.message}`, 'error');
     }
   }
 

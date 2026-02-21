@@ -153,8 +153,14 @@ main {
   display: none;
 }
 
+@keyframes crt-on {
+  0%   { clip-path: inset(0 0 100% 0); }
+  100% { clip-path: inset(0); }
+}
+
 .view.active {
   display: block;
+  animation: crt-on 200ms ease-out;
 }
 
 /* ── Status Line ── */
@@ -192,8 +198,18 @@ main {
   content: 'OK: ';
 }
 
+@keyframes glitch {
+  0%   { transform: translateX(0);    text-shadow: none; }
+  20%  { transform: translateX(-2px); text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; }
+  40%  { transform: translateX(2px);  text-shadow: -2px 0 #ff0000, 2px 0 #00ffff; }
+  60%  { transform: translateX(-1px); text-shadow: 1px 0 #ff0000, -1px 0 #00ffff; }
+  80%  { transform: translateX(1px);  text-shadow: none; }
+  100% { transform: translateX(0);    text-shadow: none; }
+}
+
 .msg-error {
   color: var(--error);
+  animation: glitch 200ms linear;
 }
 
 .msg-error::before {
@@ -220,6 +236,12 @@ main {
 .btn:hover {
   color: var(--text);
   border-color: var(--border);
+}
+
+.btn:active {
+  background: var(--text);
+  color: var(--bg);
+  transition: none;
 }
 
 .btn-primary {
@@ -304,6 +326,16 @@ input[type="number"]::-webkit-outer-spin-button {
   gap: var(--spacing-md);
 }
 
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-grid > *,
+.eat-grid > * {
+  animation: card-in 150ms ease-out both;
+}
+
 /* ── Empty State ── */
 .empty-state {
   color: var(--text-muted);
@@ -360,6 +392,11 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-bottom: var(--spacing-sm);
 }
 
+.recipe-card__macros-label {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
 .recipe-card__actions {
   display: flex;
   gap: var(--spacing-sm);
@@ -367,9 +404,19 @@ input[type="number"]::-webkit-outer-spin-button {
   align-items: center;
 }
 
+.recipe-card__confirm {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
 /* ── Recipe Form ── */
 .recipe-form {
   max-width: 120ch;
+}
+
+.recipe-form > .prompt {
+  margin-bottom: var(--spacing-md);
 }
 
 .recipe-form__field {
@@ -731,6 +778,16 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-bottom: var(--spacing-md);
 }
 
+@keyframes seg-in {
+  from { opacity: 0; }
+  to   { opacity: var(--seg-opacity, 1); }
+}
+
+@keyframes bar-fill-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
 /* Bar Gauge */
 .bar-gauge {
   display: flex;
@@ -747,6 +804,10 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .bar-gauge__fill {
   color: var(--text);
+}
+
+.bar-gauge__fill--animate {
+  animation: bar-fill-in 400ms ease-out both;
 }
 
 .bar-gauge__empty {
@@ -845,7 +906,8 @@ input[type="number"]::-webkit-outer-spin-button {
   color: var(--text-muted);
   font-size: var(--font-size-sm);
   flex-shrink: 0;
-  width: 5ch;
+  width: 7ch;
+  margin-right: 0.75em;
 }
 
 .consumption-log__name {
@@ -938,6 +1000,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .adhoc-food__actions {
+  margin-top: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
 }
 
@@ -966,11 +1029,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* ── Command Palette ── */
 .command-palette {
-  display: none;
-}
-
-.command-palette.open {
-  display: block;
   position: fixed;
   top: 0;
   left: 0;
@@ -978,17 +1036,32 @@ input[type="number"]::-webkit-outer-spin-button {
   bottom: 0;
   z-index: 1000;
   background: rgba(0, 0, 0, 0.75);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 150ms, visibility 150ms;
+  pointer-events: none;
+}
+
+.command-palette.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .command-palette__container {
   position: absolute;
   top: 15vh;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-20px);
+  transition: transform 150ms ease-out;
   width: 60ch;
   max-width: calc(100vw - 4ch);
   border: 1px solid var(--border);
   background: var(--bg);
+}
+
+.command-palette.open .command-palette__container {
+  transform: translateX(-50%) translateY(0);
 }
 
 .command-palette__input {

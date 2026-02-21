@@ -1,6 +1,6 @@
 import { getInventory, addLogEntry, deleteRecipe } from '../utils/db.js';
 import { navigate } from '../utils/router.js';
-import { escHtml } from '../utils/html.js';
+import { escHtml, typewrite } from '../utils/html.js';
 import './num-input.js';
 
 class RecipeCard extends HTMLElement {
@@ -53,6 +53,7 @@ class RecipeCard extends HTMLElement {
           <span class="recipe-card__inventory">${this._inventory} in stock</span>
         </div>
         <div class="recipe-card__macros">
+          <span class="recipe-card__macros-label">per serving:</span>
           <span>p:${Math.round(m.protein)}g</span>
           <span>c:${Math.round(m.carbs)}g</span>
           <span>f:${Math.round(m.fat)}g</span>
@@ -85,27 +86,20 @@ class RecipeCard extends HTMLElement {
   }
 
   async _handleMade() {
-    const card = this.querySelector('.recipe-card');
-    // Replace actions area with inline prompt
+    const servings = this._recipe.servings || 1;
     const actions = this.querySelector('.recipe-card__actions');
     actions.innerHTML = `
-      <span class="prompt">servings made:</span>
-      <num-input min="1" value="1" width="6ch"></num-input>
-      <button class="btn" data-action="confirm-made">[ok]</button>
-      <button class="btn" data-action="cancel">[cancel]</button>
+      <span class="prompt">add ${servings} serving${servings !== 1 ? 's' : ''} to inventory?</span>
+      <div class="recipe-card__confirm">
+        <button class="btn" data-action="confirm-made">[y]</button>
+        <button class="btn" data-action="cancel">[n]</button>
+      </div>
     `;
-
-    const numInput = actions.querySelector('num-input');
-    numInput.focus();
-    numInput.select();
 
     const confirm = actions.querySelector('[data-action="confirm-made"]');
     const cancel = actions.querySelector('[data-action="cancel"]');
 
-    const submit = async () => {
-      const servings = parseInt(numInput.value, 10);
-      if (!servings || servings < 1) return;
-
+    confirm.addEventListener('click', async () => {
       await addLogEntry({
         recipeId: this._recipe.id,
         type: 'production',
@@ -115,21 +109,17 @@ class RecipeCard extends HTMLElement {
 
       this._inventory += servings;
       this.render();
-      const msg = this.querySelector('.recipe-card__actions');
-      if (msg) {
-        const feedback = document.createElement('span');
+      const actionsEl = this.querySelector('.recipe-card__actions');
+      if (actionsEl) {
+        const feedback = document.createElement('div');
         feedback.className = 'msg-ok';
-        feedback.textContent = `OK: ${servings} serving${servings !== 1 ? 's' : ''} added`;
-        msg.prepend(feedback);
+        feedback.style.marginTop = 'var(--spacing-sm)';
+        actionsEl.after(feedback);
+        typewrite(feedback, `${servings} serving${servings !== 1 ? 's' : ''} added`);
       }
       this.dispatchEvent(new CustomEvent('inventory-changed', { bubbles: true }));
-    };
-
-    confirm.addEventListener('click', submit);
-    numInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submit();
-      if (e.key === 'Escape') this.render();
     });
+
     cancel.addEventListener('click', () => this.render());
   }
 

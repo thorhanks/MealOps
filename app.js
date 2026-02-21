@@ -80,12 +80,13 @@ async function renderCookGrid() {
     `;
   } else {
     const grid = view.querySelector('#recipe-grid');
-    for (const recipe of recipes) {
+    recipes.forEach((recipe, i) => {
       const card = document.createElement('recipe-card');
       card.inventory = inventoryMap[recipe.id] || 0;
       card.recipe = recipe;
+      card.style.animationDelay = `${i * 50}ms`;
       grid.appendChild(card);
-    }
+    });
   }
 
   view.querySelector('#btn-new-recipe').addEventListener('click', () => {

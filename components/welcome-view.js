@@ -1,6 +1,10 @@
+import { typewrite } from '../utils/html.js';
+
 class WelcomeView extends HTMLElement {
   connectedCallback() {
     this.render();
+    const tagline = this.querySelector('.welcome-view__tagline');
+    if (tagline) typewrite(tagline, '> souper cube meal ops terminal', 40);
   }
 
   render() {
@@ -8,7 +12,7 @@ class WelcomeView extends HTMLElement {
       <div class="welcome-view">
         <img class="welcome-view__logo" src="logo.png" alt="MEALOPS" />
 
-        <p class="welcome-view__tagline">> souper cube meal ops terminal</p>
+        <p class="welcome-view__tagline"></p>
 
         <div class="welcome-view__desc">
           <p>local-only meal prep management system.</p>

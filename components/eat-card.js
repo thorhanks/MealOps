@@ -1,6 +1,6 @@
 import { addLogEntry } from '../utils/db.js';
 import './num-input.js';
-import { escHtml } from '../utils/html.js';
+import { escHtml, typewrite } from '../utils/html.js';
 
 class EatCard extends HTMLElement {
   constructor() {
@@ -138,7 +138,7 @@ class EatCard extends HTMLElement {
       errorEl.className = 'msg-error eat-error';
       container.appendChild(errorEl);
     }
-    errorEl.textContent = message;
+    typewrite(errorEl, message);
   }
 
 }
