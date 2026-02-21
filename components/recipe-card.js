@@ -1,6 +1,6 @@
 import { getInventory, addLogEntry, deleteRecipe } from '../utils/db.js';
 import { navigate } from '../utils/router.js';
-import { escHtml } from '../utils/html.js';
+import { escHtml, typewrite } from '../utils/html.js';
 import './num-input.js';
 
 class RecipeCard extends HTMLElement {
@@ -114,8 +114,8 @@ class RecipeCard extends HTMLElement {
         const feedback = document.createElement('div');
         feedback.className = 'msg-ok';
         feedback.style.marginTop = 'var(--spacing-sm)';
-        feedback.textContent = `${servings} serving${servings !== 1 ? 's' : ''} added`;
         actionsEl.after(feedback);
+        typewrite(feedback, `${servings} serving${servings !== 1 ? 's' : ''} added`);
       }
       this.dispatchEvent(new CustomEvent('inventory-changed', { bubbles: true }));
     });

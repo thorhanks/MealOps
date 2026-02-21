@@ -1,7 +1,7 @@
 import { searchFoodsDebounced, scaleNutrients, getApiKey, saveApiKey } from '../utils/api.js';
 import { UNIT_OPTIONS, toGrams } from '../utils/units.js';
 import './num-input.js';
-import { escHtml } from '../utils/html.js';
+import { escHtml, typeMsg } from '../utils/html.js';
 
 class AdhocFood extends HTMLElement {
   constructor() {
@@ -109,12 +109,12 @@ class AdhocFood extends HTMLElement {
     }
 
     const resultsEl = this.querySelector('.adhoc-food__results');
-    resultsEl.innerHTML = '<span class="msg-loading">searching USDA...</span>';
+    typeMsg(resultsEl, 'searching USDA...', 'loading');
 
     try {
       const results = await searchFoodsDebounced(name, 10);
       if (results.length === 0) {
-        resultsEl.innerHTML = '<span class="msg-error">no results — enter macros manually</span>';
+        typeMsg(resultsEl, 'no results — enter macros manually', 'error');
         return;
       }
 
@@ -135,7 +135,7 @@ class AdhocFood extends HTMLElement {
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.error('[AdhocFood] search error', err);
-      resultsEl.innerHTML = `<span class="msg-error">${escHtml(err.message)}</span>`;
+      typeMsg(resultsEl, err.message, 'error');
     }
   }
 
@@ -176,7 +176,7 @@ class AdhocFood extends HTMLElement {
       const key = input.value.trim();
       if (key) {
         await saveApiKey(key);
-        resultsEl.innerHTML = '<span class="msg-ok">API key saved</span>';
+        typeMsg(resultsEl, 'API key saved', 'ok');
         setTimeout(() => this._handleSearch(), 500);
       }
     };
@@ -193,7 +193,7 @@ class AdhocFood extends HTMLElement {
     const statusEl = this.querySelector('.adhoc-food__status');
 
     if (!name) {
-      statusEl.innerHTML = '<span class="msg-error">food name is required</span>';
+      typeMsg(statusEl, 'food name is required', 'error');
       return;
     }
 
