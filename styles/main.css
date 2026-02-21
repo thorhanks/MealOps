@@ -153,8 +153,14 @@ main {
   display: none;
 }
 
+@keyframes crt-on {
+  0%   { clip-path: inset(0 0 100% 0); }
+  100% { clip-path: inset(0); }
+}
+
 .view.active {
   display: block;
+  animation: crt-on 200ms ease-out;
 }
 
 /* ── Status Line ── */
