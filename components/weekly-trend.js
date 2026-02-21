@@ -112,8 +112,8 @@ class WeeklyTrend extends HTMLElement {
       const isOver = pct > 1;
       const isSelected = d.isSelected;
 
-      // Wedge background — subtle alternating tint
-      const bgColor = i % 2 === 0 ? '#2a1f00' : '#1a1400';
+      // Wedge background
+      const bgColor = '#2a1f00';
       const bgPath = arcSectorPath(wedgeStart, wedgeEnd, R_INNER, R_OUTER);
       svg += `<path d="${bgPath}" fill="${bgColor}" opacity="0.6" />\n`;
 

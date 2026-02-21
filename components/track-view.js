@@ -299,13 +299,16 @@ class TrackView extends HTMLElement {
 
     const rows = this._resolvedEntries.map((e) => {
       const time = new Date(e.date);
-      const hh = String(time.getHours()).padStart(2, '0');
+      const h24 = time.getHours();
+      const h12 = h24 % 12 || 12;
       const mm = String(time.getMinutes()).padStart(2, '0');
+      const ampm = h24 < 12 ? 'am' : 'pm';
+      const hh = `${h12}:${mm}${ampm}`;
       const m = e.macros;
 
       return `
         <div class="consumption-log__entry" data-id="${e.id}">
-          <span class="consumption-log__time">${hh}:${mm}</span>
+          <span class="consumption-log__time">${hh}</span>
           <span class="consumption-log__name">${escHtml(e.displayName)}</span>
           <span class="consumption-log__detail">${escHtml(e.displayDetail)}</span>
           <span class="consumption-log__macros">[p:${Math.round(m.protein)}g c:${Math.round(m.carbs)}g f:${Math.round(m.fat)}g cal:${Math.round(m.calories)}]</span>
