@@ -112,7 +112,7 @@ class AdhocFood extends HTMLElement {
     resultsEl.innerHTML = '<span class="msg-loading">searching USDA...</span>';
 
     try {
-      const results = await searchFoodsDebounced(name, 5);
+      const results = await searchFoodsDebounced(name, 10);
       if (results.length === 0) {
         resultsEl.innerHTML = '<span class="msg-error">no results — enter macros manually</span>';
         return;

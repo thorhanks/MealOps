@@ -372,6 +372,10 @@ input[type="number"]::-webkit-outer-spin-button {
   max-width: 120ch;
 }
 
+.recipe-form > .prompt {
+  margin-bottom: var(--spacing-md);
+}
+
 .recipe-form__field {
   margin-bottom: var(--spacing-md);
 }
@@ -939,6 +943,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .adhoc-food__actions {
+  margin-top: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
 }
 
