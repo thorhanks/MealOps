@@ -198,8 +198,18 @@ main {
   content: 'OK: ';
 }
 
+@keyframes glitch {
+  0%   { transform: translateX(0);    text-shadow: none; }
+  20%  { transform: translateX(-2px); text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; }
+  40%  { transform: translateX(2px);  text-shadow: -2px 0 #ff0000, 2px 0 #00ffff; }
+  60%  { transform: translateX(-1px); text-shadow: 1px 0 #ff0000, -1px 0 #00ffff; }
+  80%  { transform: translateX(1px);  text-shadow: none; }
+  100% { transform: translateX(0);    text-shadow: none; }
+}
+
 .msg-error {
   color: var(--error);
+  animation: glitch 200ms linear;
 }
 
 .msg-error::before {
