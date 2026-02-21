@@ -91,8 +91,8 @@ class RecipeCard extends HTMLElement {
     actions.innerHTML = `
       <span class="prompt">add ${servings} serving${servings !== 1 ? 's' : ''} to inventory?</span>
       <div class="recipe-card__confirm">
-        <button class="btn" data-action="confirm-made">[yes]</button>
-        <button class="btn" data-action="cancel">[no]</button>
+        <button class="btn" data-action="confirm-made">[y]</button>
+        <button class="btn" data-action="cancel">[n]</button>
       </div>
     `;
 
@@ -109,12 +109,13 @@ class RecipeCard extends HTMLElement {
 
       this._inventory += servings;
       this.render();
-      const msg = this.querySelector('.recipe-card__actions');
-      if (msg) {
-        const feedback = document.createElement('span');
+      const actionsEl = this.querySelector('.recipe-card__actions');
+      if (actionsEl) {
+        const feedback = document.createElement('div');
         feedback.className = 'msg-ok';
-        feedback.textContent = `OK: ${servings} serving${servings !== 1 ? 's' : ''} added`;
-        msg.prepend(feedback);
+        feedback.style.marginTop = 'var(--spacing-sm)';
+        feedback.textContent = `${servings} serving${servings !== 1 ? 's' : ''} added`;
+        actionsEl.after(feedback);
       }
       this.dispatchEvent(new CustomEvent('inventory-changed', { bubbles: true }));
     });
