@@ -184,32 +184,6 @@ Add a blinking block cursor next to focused inputs using a step animation on a p
 
 May need a wrapper element since `::after` doesn't work on `<input>`. Alternative: style the native caret with `caret-color: var(--text)` and `caret-shape: block` (limited browser support).
 
----
-
-## 9. Phosphor Fade on View Exit
-
-**Complexity:** High (JS + CSS)
-**Files:** `styles/main.css`, `app.js`
-
-When a view hides, leave a "phosphor ghost" — the old content fades out with a greenish afterglow (~200ms), mimicking CRT phosphor decay.
-
-Approach: clone the outgoing view into an overlay, apply a green tint + fade-out animation, then remove the clone.
-
-```css
-@keyframes phosphor-fade {
-  from { opacity: 0.6; filter: hue-rotate(60deg) brightness(1.2); }
-  to   { opacity: 0; }
-}
-
-.phosphor-ghost {
-  position: absolute;
-  inset: 0;
-  animation: phosphor-fade 250ms ease-out forwards;
-  pointer-events: none;
-}
-```
-
-This one is the most complex — pairs well with effect #5 (CRT power-on) for a full enter/exit cycle.
 
 ---
 
@@ -223,4 +197,3 @@ This one is the most complex — pairs well with effect #5 (CRT power-on) for a 
 6. Scanline glitch on errors — visual error distinction
 7. SVG chart draw-in — data visualization polish
 8. Cursor blink on active input — small detail
-9. Phosphor fade on view exit — pairs with #5, do last
