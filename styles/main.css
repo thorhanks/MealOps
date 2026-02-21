@@ -2,8 +2,8 @@
 
 /* ── Custom Properties ── */
 :root {
-  --bg: #141008;
-  --bg-surface: #1a1510;
+  --bg: #1a160e;
+  --bg-surface: #211c14;
   --text: #ffb000;
   --text-muted: #aa7700;
   --error: #ff3333;
@@ -261,10 +261,18 @@ main {
   padding: var(--spacing-xs) 0;
   width: 100%;
   transition: border-color 0.1s;
+  caret-color: var(--text);
 }
 
 .input:focus {
   border-color: var(--border);
+  caret-color: var(--text);
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { caret-color: var(--text); }
+  50% { caret-color: transparent; }
 }
 
 .input::placeholder {
@@ -1073,6 +1081,11 @@ input[type="number"]::-webkit-outer-spin-button {
   color: var(--text);
   background: var(--bg);
   font-family: var(--font);
+  caret-color: var(--text);
+}
+
+.command-palette__input:focus {
+  animation: cursor-blink 1s step-end infinite;
 }
 
 .command-palette__input::placeholder {
