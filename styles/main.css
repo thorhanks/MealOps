@@ -778,6 +778,16 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-bottom: var(--spacing-md);
 }
 
+@keyframes seg-in {
+  from { opacity: 0; }
+  to   { opacity: var(--seg-opacity, 1); }
+}
+
+@keyframes bar-fill-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
 /* Bar Gauge */
 .bar-gauge {
   display: flex;
@@ -794,6 +804,10 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .bar-gauge__fill {
   color: var(--text);
+}
+
+.bar-gauge__fill--animate {
+  animation: bar-fill-in 400ms ease-out both;
 }
 
 .bar-gauge__empty {

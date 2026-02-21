@@ -261,12 +261,17 @@ class TrackView extends HTMLElement {
     if (!container) return;
 
     const totals = this._sumMacros();
-    container.innerHTML = '';
-    const gauge = document.createElement('body-gauge');
-    gauge.setAttribute('current', totals.calories);
-    gauge.setAttribute('target', this._targetCalories);
-    gauge.setAttribute('label', 'kcal');
-    container.appendChild(gauge);
+    let gauge = container.querySelector('body-gauge');
+    if (!gauge) {
+      gauge = document.createElement('body-gauge');
+      gauge.setAttribute('label', 'kcal');
+      gauge.setAttribute('current', totals.calories);
+      gauge.setAttribute('target', this._targetCalories);
+      container.appendChild(gauge);
+    } else {
+      gauge.setAttribute('current', totals.calories);
+      gauge.setAttribute('target', this._targetCalories);
+    }
   }
 
   _renderPie() {
@@ -274,10 +279,12 @@ class TrackView extends HTMLElement {
     if (!container) return;
 
     const totals = this._sumMacros();
-    container.innerHTML = '';
-    const pie = document.createElement('macro-pie');
+    let pie = container.querySelector('macro-pie');
+    if (!pie) {
+      pie = document.createElement('macro-pie');
+      container.appendChild(pie);
+    }
     pie.data = { protein: totals.protein, carbs: totals.carbs, fat: totals.fat };
-    container.appendChild(pie);
   }
 
   _renderLog() {
@@ -419,11 +426,13 @@ class TrackView extends HTMLElement {
     const container = this.querySelector('.track-trend');
     if (!container) return;
 
-    container.innerHTML = '';
-    const trend = document.createElement('weekly-trend');
+    let trend = container.querySelector('weekly-trend');
+    if (!trend) {
+      trend = document.createElement('weekly-trend');
+      container.appendChild(trend);
+    }
     trend.weekLabel = `week of ${formatDate(sunday)}`;
     trend.data = weekData;
-    container.appendChild(trend);
   }
 
 }

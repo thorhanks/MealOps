@@ -68,6 +68,7 @@ class WeeklyTrend extends HTMLElement {
   }
 
   connectedCallback() {
+    this._animate = true;
     this.render();
   }
 
@@ -126,7 +127,14 @@ class WeeklyTrend extends HTMLElement {
         const opacity = lit ? 1 : 0.2;
 
         const path = arcSectorPath(wedgeStart, wedgeEnd, rIn, rOut);
-        svg += `<path d="${path}" fill="${color}" opacity="${opacity}" style="transition:opacity .3s" />\n`;
+        let style;
+        if (this._animate) {
+          const delay = i * 40 + seg * 25;
+          style = `--seg-opacity:${opacity}; animation: seg-in 200ms ${delay}ms ease-out both`;
+        } else {
+          style = `opacity:${opacity}`;
+        }
+        svg += `<path d="${path}" fill="${color}" style="${style}" />\n`;
       }
 
       // Selected day highlight — faint overlay on full wedge
@@ -167,6 +175,7 @@ class WeeklyTrend extends HTMLElement {
         </svg>
       </div>
     `;
+    this._animate = false;
 
     // Click + keyboard handlers for day wedges
     this.querySelectorAll('[data-day]').forEach((el) => {

@@ -41,8 +41,8 @@ class BodyGauge extends HTMLElement {
     return ['current', 'target', 'label'];
   }
 
-  connectedCallback() { this.render(); }
-  attributeChangedCallback() { if (this.isConnected) this.render(); }
+  connectedCallback() { this._connected = true; this._animate = true; this.render(); }
+  attributeChangedCallback() { if (this._connected) this.render(); }
 
   render() {
     const current = parseFloat(this.getAttribute('current')) || 0;
@@ -70,8 +70,12 @@ class BodyGauge extends HTMLElement {
       const lit = i < litCount;
       const color = segColor(i, SEGMENTS, isOver && lit);
 
+      const op = lit ? 1 : 0.12;
+      const anim = this._animate
+        ? `--seg-opacity:${op}; animation: seg-in 200ms ${i * 30}ms ease-out both`
+        : `opacity:${op}`;
       segs.push(
-        `<path d="${arcPath(a0, a1)}" fill="none" stroke="${color}" stroke-width="${STROKE_W}" stroke-linecap="butt" opacity="${lit ? 1 : 0.12}" style="transition:opacity .3s" />`
+        `<path d="${arcPath(a0, a1)}" fill="none" stroke="${color}" stroke-width="${STROKE_W}" stroke-linecap="butt" style="${anim}" />`
       );
     }
 
@@ -132,6 +136,7 @@ class BodyGauge extends HTMLElement {
         </svg>
       </div>
     `;
+    this._animate = false;
   }
 }
 
