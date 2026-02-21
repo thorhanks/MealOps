@@ -999,11 +999,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* ── Command Palette ── */
 .command-palette {
-  display: none;
-}
-
-.command-palette.open {
-  display: block;
   position: fixed;
   top: 0;
   left: 0;
@@ -1011,17 +1006,32 @@ input[type="number"]::-webkit-outer-spin-button {
   bottom: 0;
   z-index: 1000;
   background: rgba(0, 0, 0, 0.75);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 150ms, visibility 150ms;
+  pointer-events: none;
+}
+
+.command-palette.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .command-palette__container {
   position: absolute;
   top: 15vh;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-20px);
+  transition: transform 150ms ease-out;
   width: 60ch;
   max-width: calc(100vw - 4ch);
   border: 1px solid var(--border);
   background: var(--bg);
+}
+
+.command-palette.open .command-palette__container {
+  transform: translateX(-50%) translateY(0);
 }
 
 .command-palette__input {

@@ -36,14 +36,27 @@ class CommandPalette extends HTMLElement {
     this._statusMsg = '';
     this._filtered = [...COMMANDS];
     this.render();
-    const input = this.querySelector('.command-palette__input');
-    if (input) input.focus();
+    // Force layout flush then add .open so CSS transition triggers
+    const palette = this.querySelector('.command-palette');
+    palette.getBoundingClientRect();
+    palette.classList.add('open');
+    // Focus after transition so element is visible and focusable
+    palette.addEventListener('transitionend', () => {
+      const input = this.querySelector('.command-palette__input');
+      if (input) input.focus();
+    }, { once: true });
   }
 
   close() {
     this._open = false;
     this._statusMsg = '';
-    this.render();
+    const palette = this.querySelector('.command-palette');
+    if (palette) {
+      palette.classList.remove('open');
+      palette.addEventListener('transitionend', () => this.render(), { once: true });
+    } else {
+      this.render();
+    }
   }
 
   get isOpen() {
@@ -52,7 +65,7 @@ class CommandPalette extends HTMLElement {
 
   render() {
     this.innerHTML = `
-      <div class="command-palette ${this._open ? 'open' : ''}" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div class="command-palette" role="dialog" aria-modal="true" aria-label="Command palette">
         <div class="command-palette__container">
           <input class="command-palette__input" type="text"
             placeholder="> type a command..." value="${escHtml(this._query)}"
