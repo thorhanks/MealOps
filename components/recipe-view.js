@@ -1,5 +1,6 @@
 import { getRecipe, getInventory } from '../utils/db.js';
 import { navigate } from '../utils/router.js';
+import { escHtml } from '../utils/html.js';
 
 class RecipeView extends HTMLElement {
   constructor() {
@@ -32,7 +33,7 @@ class RecipeView extends HTMLElement {
       const n = ing.nutrition || {};
       const src = ing.source === 'usda-api' ? 'usda' : 'manual';
       return `<div class="recipe-view__ingredient">
-        ${this._esc(ing.amount)} ${this._esc(ing.unit)} ${this._esc(ing.name)}
+        ${escHtml(ing.amount)} ${escHtml(ing.unit)} ${escHtml(ing.name)}
         <span class="recipe-view__ing-macros">[p:${Math.round(n.protein || 0)}g c:${Math.round(n.carbs || 0)}g f:${Math.round(n.fat || 0)}g cal:${Math.round(n.calories || 0)}] (${src})</span>
       </div>`;
     }).join('');
@@ -40,7 +41,7 @@ class RecipeView extends HTMLElement {
     this.innerHTML = `
       <div class="recipe-view">
         <div class="recipe-view__header">
-          <h2 class="prompt">${this._esc(r.name)}</h2>
+          <h2 class="prompt">${escHtml(r.name)}</h2>
           <span class="recipe-view__meta">${r.servings} servings | ${this._inventory} in stock</span>
         </div>
 
@@ -55,7 +56,7 @@ class RecipeView extends HTMLElement {
 
         <div class="recipe-view__section">
           <h3>> instructions</h3>
-          <pre class="recipe-view__instructions">${this._esc(r.instructions || 'no instructions')}</pre>
+          <pre class="recipe-view__instructions">${escHtml(r.instructions || 'no instructions')}</pre>
         </div>
 
         <div class="recipe-view__actions">
@@ -74,11 +75,6 @@ class RecipeView extends HTMLElement {
     });
   }
 
-  _esc(str) {
-    const div = document.createElement('div');
-    div.textContent = str ?? '';
-    return div.innerHTML;
-  }
 }
 
 customElements.define('recipe-view', RecipeView);

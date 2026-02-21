@@ -1,45 +1,11 @@
-import { getConsumptionByDate, getRecipe, getSettings, saveSettings, addLogEntry, removeLogEntry } from '../utils/db.js';
+import { getConsumptionByDate, getLogByDate, getRecipe, getSettings, addLogEntry, removeLogEntry, updateSettings } from '../utils/db.js';
 import './body-gauge.js';
 import './weekly-trend.js';
 import './adhoc-food.js';
 import './num-input.js';
 import './macro-pie.js';
-
-// ── Date Helpers ──
-
-function startOfDay(date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
-}
-
-function endOfDay(date) {
-  const d = new Date(date);
-  d.setHours(23, 59, 59, 999);
-  return d.getTime();
-}
-
-function formatDate(ts) {
-  const d = new Date(ts);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-function getWeekSunday(date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  const dayOfWeek = d.getDay(); // 0=Sun
-  d.setDate(d.getDate() - dayOfWeek);
-  return d.getTime();
-}
-
-function addDays(ts, days) {
-  const d = new Date(ts);
-  d.setDate(d.getDate() + days);
-  return d.getTime();
-}
+import { escHtml } from '../utils/html.js';
+import { startOfDay, endOfDay, formatDate, getWeekSunday, addDays } from '../utils/date.js';
 
 // ── Component ──
 
@@ -148,6 +114,13 @@ class TrackView extends HTMLElement {
       if (e.target.closest('.track-date-nav__adhoc')) showAdhoc();
     });
 
+    this.addEventListener('keydown', (e) => {
+      if (e.key === 'a' && !e.ctrlKey && !e.metaKey && !e.target.closest('input, textarea, select, num-input, adhoc-food')) {
+        e.preventDefault();
+        showAdhoc();
+      }
+    });
+
     this.addEventListener('adhoc-cancelled', () => hideAdhoc());
     this.addEventListener('adhoc-logged', (e) => {
       this._handleAdhocLogged(e.detail);
@@ -178,9 +151,7 @@ class TrackView extends HTMLElement {
     if (!value || value < 0) return;
 
     this._targetCalories = value;
-    const settings = await getSettings();
-    settings.targetCalories = value;
-    await saveSettings(settings);
+    await updateSettings((s) => { s.targetCalories = value; });
     console.log('[Track] target updated:', value);
 
     this._renderGauge();
@@ -335,8 +306,8 @@ class TrackView extends HTMLElement {
       return `
         <div class="consumption-log__entry" data-id="${e.id}">
           <span class="consumption-log__time">${hh}:${mm}</span>
-          <span class="consumption-log__name">${this._esc(e.displayName)}</span>
-          <span class="consumption-log__detail">${this._esc(e.displayDetail)}</span>
+          <span class="consumption-log__name">${escHtml(e.displayName)}</span>
+          <span class="consumption-log__detail">${escHtml(e.displayDetail)}</span>
           <span class="consumption-log__macros">[p:${Math.round(m.protein)}g c:${Math.round(m.carbs)}g f:${Math.round(m.fat)}g cal:${Math.round(m.calories)}]</span>
           <button class="btn btn-danger consumption-log__delete">[x]</button>
         </div>
@@ -404,31 +375,41 @@ class TrackView extends HTMLElement {
 
   async _renderTrend() {
     const sunday = getWeekSunday(this._selectedDate);
+    const weekStart = startOfDay(sunday);
+    const weekEnd = endOfDay(addDays(sunday, 6));
+
+    let allEntries;
+    try {
+      allEntries = (await getLogByDate(weekStart, weekEnd)).filter((e) => e.type === 'consumption');
+    } catch {
+      allEntries = [];
+    }
+
+    // Bucket entries by day index (0=Sun .. 6=Sat)
+    const buckets = [[], [], [], [], [], [], []];
+    for (const entry of allEntries) {
+      const dayIndex = Math.floor((entry.date - weekStart) / 86400000);
+      if (dayIndex >= 0 && dayIndex < 7) buckets[dayIndex].push(entry);
+    }
+
+    const resolved = await this._resolveEntries(allEntries);
+    // Build a map of entry id → resolved macros
+    const resolvedById = {};
+    for (const r of resolved) resolvedById[r.id] = r;
+
     const weekData = [];
-
     for (let i = 0; i < 7; i++) {
-      const dayTs = addDays(sunday, i);
-      const dayStart = startOfDay(dayTs);
-      const dayEnd = endOfDay(dayTs);
-
-      let entries;
-      try {
-        entries = await getConsumptionByDate(dayStart, dayEnd);
-      } catch {
-        entries = [];
-      }
-
-      const resolved = await this._resolveEntries(entries);
       let calories = 0;
-      for (const e of resolved) {
-        calories += e.macros.calories;
+      for (const entry of buckets[i]) {
+        const r = resolvedById[entry.id];
+        if (r) calories += r.macros.calories;
       }
 
       weekData.push({
         day: i,
         calories,
         target: this._targetCalories,
-        isSelected: dayStart === startOfDay(this._selectedDate),
+        isSelected: startOfDay(addDays(sunday, i)) === startOfDay(this._selectedDate),
       });
     }
 
@@ -442,11 +423,6 @@ class TrackView extends HTMLElement {
     container.appendChild(trend);
   }
 
-  _esc(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-  }
 }
 
 customElements.define('track-view', TrackView);

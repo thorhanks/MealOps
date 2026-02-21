@@ -72,6 +72,12 @@ function importFromFile() {
         const data = JSON.parse(text);
         validateImport(data);
 
+        const summary = `Import ${data.recipes.length} recipes and ${data.servingsLog.length} log entries? Existing records with matching IDs will be overwritten.`;
+        if (!confirm(summary)) {
+          reject(new Error('import cancelled'));
+          return;
+        }
+
         const counts = await importData(data);
         resolve(counts);
       } catch (err) {

@@ -3,6 +3,7 @@ import { searchFoodsDebounced, scaleNutrients, getApiKey, saveApiKey } from '../
 import { UNIT_OPTIONS, toGrams, hasFixedConversion } from '../utils/units.js';
 import { navigate } from '../utils/router.js';
 import './num-input.js';
+import { escHtml } from '../utils/html.js';
 
 class RecipeForm extends HTMLElement {
   constructor() {
@@ -48,7 +49,7 @@ class RecipeForm extends HTMLElement {
         <div class="recipe-form__field">
           <label>> name:</label>
           <input type="text" class="input" id="rf-name"
-            value="${this._esc(r?.name || '')}"
+            value="${escHtml(r?.name || '')}"
             placeholder="recipe name">
         </div>
 
@@ -66,7 +67,7 @@ class RecipeForm extends HTMLElement {
         <div class="recipe-form__field">
           <label>> instructions:</label>
           <textarea class="input recipe-form__textarea" id="rf-instructions"
-            placeholder="preparation steps">${this._esc(r?.instructions || '')}</textarea>
+            placeholder="preparation steps">${escHtml(r?.instructions || '')}</textarea>
         </div>
 
         <div class="recipe-form__macros" id="rf-macros-summary"></div>
@@ -117,7 +118,7 @@ class RecipeForm extends HTMLElement {
     row.innerHTML = `
       <div class="ingredient-row__main">
         <input type="text" class="input ingredient-row__name" placeholder="ingredient name"
-          value="${this._esc(ing.name || '')}">
+          value="${escHtml(ing.name || '')}">
         <num-input class="ingredient-row__amount" min="0" step="any"
           value="${ing.amount || ''}" width="6ch"></num-input>
         <select class="input ingredient-row__unit">${unitOptions}</select>
@@ -258,7 +259,7 @@ class RecipeForm extends HTMLElement {
         const item = document.createElement('button');
         item.className = 'btn usda-results__item';
         const n = food.nutrients;
-        item.innerHTML = `${this._esc(food.description)} <span class="usda-results__macros">[p:${Math.round(n.protein)}g c:${Math.round(n.carbs)}g f:${Math.round(n.fat)}g cal:${Math.round(n.calories)}/100g]</span>`;
+        item.innerHTML = `${escHtml(food.description)} <span class="usda-results__macros">[p:${Math.round(n.protein)}g c:${Math.round(n.carbs)}g f:${Math.round(n.fat)}g cal:${Math.round(n.calories)}/100g]</span>`;
         item.addEventListener('click', () => {
           this._selectUsdaResult(index, row, food);
         });
@@ -272,7 +273,7 @@ class RecipeForm extends HTMLElement {
       if (err.message === 'Invalid USDA API key') {
         resultsEl.innerHTML = '<span class="msg-error">invalid API key — check settings</span>';
       } else {
-        resultsEl.innerHTML = `<span class="msg-error">${this._esc(err.message)}</span>`;
+        resultsEl.innerHTML = `<span class="msg-error">${escHtml(err.message)}</span>`;
       }
     }
   }
@@ -436,15 +437,10 @@ class RecipeForm extends HTMLElement {
       navigate('/cook');
     } catch (err) {
       console.error('[RecipeForm] save failed', err);
-      statusEl.innerHTML = `<span class="msg-error">failed to save — ${this._esc(err.message)}</span>`;
+      statusEl.innerHTML = `<span class="msg-error">failed to save — ${escHtml(err.message)}</span>`;
     }
   }
 
-  _esc(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-  }
 }
 
 customElements.define('recipe-form', RecipeForm);

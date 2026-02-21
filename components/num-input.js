@@ -13,12 +13,12 @@ class NumInput extends HTMLElement {
 
     this.innerHTML = `
       <span class="num-input">
-        <button class="num-input__btn" data-dir="-" tabindex="-1">-</button>
+        <button class="num-input__btn" data-dir="-" tabindex="-1" aria-label="Decrease value">-</button>
         <input type="number" class="input num-input__field"
           min="${min}" max="${max}" step="${step}"
           value="${value}" placeholder="${placeholder}"
           style="width: ${width}; text-align: center;">
-        <button class="num-input__btn" data-dir="+" tabindex="-1">+</button>
+        <button class="num-input__btn" data-dir="+" tabindex="-1" aria-label="Increase value">+</button>
       </span>
     `;
 

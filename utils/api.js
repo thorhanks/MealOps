@@ -1,4 +1,4 @@
-import { getSettings, saveSettings } from './db.js';
+import { getSettings, updateSettings } from './db.js';
 
 const BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
 
@@ -25,9 +25,7 @@ async function getApiKey() {
  * Save the API key to settings.
  */
 async function saveApiKey(key) {
-  const settings = await getSettings();
-  settings.usdaApiKey = key;
-  await saveSettings(settings);
+  await updateSettings((s) => { s.usdaApiKey = key; });
 }
 
 /**
