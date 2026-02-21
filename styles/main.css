@@ -360,11 +360,22 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-bottom: var(--spacing-sm);
 }
 
+.recipe-card__macros-label {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
 .recipe-card__actions {
   display: flex;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
   align-items: center;
+}
+
+.recipe-card__confirm {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
 }
 
 /* ── Recipe Form ── */
